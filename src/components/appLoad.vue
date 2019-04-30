@@ -1,5 +1,12 @@
 <template>
   <div>
+    <div class="tab-load">
+      <i @click="window.dove.closePage()"></i>
+      <span>编辑</span>
+      <div class="submit-load" @click="submitForm">
+        <p>发表</p>
+      </div>
+    </div>
     <div class="dove-cover">
       <img :src="coverUrl" v-if="coverUrl">
       <label class="cover-btn button is-danger" :class="{'active':!firstUp}">
@@ -24,13 +31,14 @@
   </div>
 </template>
 <script>
-
+import axios from "axios";
+import { Toast } from "vant";
 import vEditDiv from "./vEditDiv";
 export default {
   name: "appLoad",
   data() {
     return {
-      filesType:'',
+      filesType: "",
       firstUp: true,
       imageUrl: "",
       coverUrl: "",
@@ -72,7 +80,7 @@ export default {
     onFileChange(e) {
       console.log(e.target);
       console.log(e.target.files[0].type);
-      this.filesType=e.target.files[0].type;
+      this.filesType = e.target.files[0].type;
       this.positionImg = e.target.getAttribute("name");
       this.validateImageFile(e.target.files);
     },
@@ -82,31 +90,65 @@ export default {
       reader.readAsDataURL(file);
       reader.onload = e => {
         let base64Img = e.target.result;
-        let arr=base64Img.split(",");
-        let currentFile=arr[1];
+        let arr = base64Img.split(",");
+        let currentFile = arr[1];
         console.log(arr[1]);
         this.imageUrl = e.target.result;
-        let blobFile=(typeof currentFile === "string"
-          ? that.convertToBlob(currentFile, that.filesType)
-          : currentFile);
-          console.log(blobFile);
+        let blobFile =
+          typeof currentFile === "string"
+            ? that.convertToBlob(currentFile, that.filesType)
+            : currentFile;
+        console.log(blobFile);
         let formData = new FormData();
-        formData.append('file',blobFile);
-        formData.append('type',that.filesType);
+        formData.append("file", blobFile);
+        formData.append("type", 0);
         console.log(formData);
-        that.$post('http://www.imuguang.com/api/upload/art/upload',formData).then(res=>{
+        that
+          .upImage("http://www.imuguang.com/api/upload/art/upload", formData)
+          .then(res => {
             console.log(res);
-        })
-        if (this.positionImg !== "cover") {
-          this.text += `<p class="img-box"><img src="${
-            this.imageUrl
-          }" style="margin:0 auto;margin-top:20px;"/></p><p class="edit-clear"> </p>`;
-          this.submitForm();
-        } else {
-          that.firstUp = false;
-          this.coverUrl = this.imageUrl;
-        }
+            if (res.code == 0) {
+              if (that.positionImg !== "cover") {
+                that.text += `<p class="img-box"><img src="${
+                  res.data.displayUrl
+                    ? "http://www.imuguang.com/img/" + res.data.displayUrl
+                    : that.imageUrl
+                }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+              } else {
+                that.firstUp = false;
+                that.coverUrl = `${
+                  res.data.displayUrl
+                    ? "http://www.imuguang.com/img/" + res.data.displayUrl
+                    : that.imageUrl
+                }`;
+              }
+              Toast(res);
+            }
+          });
       };
+    },
+    upImage(url, data) {
+      let appHeaders = JSON.parse(window.localStorage.getItem("header"));
+      let otherHeader = {
+        "Content-Type": "multipart/form-data",
+        "publish-id": window.localStorage.getItem("publishId")
+      };
+      let currentHearder=Object.assign(appHeaders,otherHeader);
+      return new Promise((resolve, reject) => {
+        axios({
+          url: url,
+          method: "post",
+          data: data,
+          headers:currentHearder 
+        }).then(
+          response => {
+            resolve(response.data);
+          },
+          err => {
+            reject(err);
+          }
+        );
+      });
     },
     // createImage(file) {
     //   return new Promise(function(resolve, reject) {
@@ -202,17 +244,87 @@ export default {
       console.log(this.coverImg);
       console.log(this.title);
       console.log(this.text);
+      let data = {
+        title: this.title,
+        content: this.text,
+        detail: this.getDetail(this.text)
+      };
+      this.$post("http://www.imuguang.com/api/upload/art/commit", data).then(
+        Response => {
+          Toast(Response.message);
+          if(Response.code==0){
+             window.localStorage.setItem("publishId", "");
+            window.dove.closePage();
+          }
+        }
+      );
+    },
+    getDetail(html) {
+      let re = new RegExp("<[^<>]+>", "g");
+      let text = html.replace(re, "");
+      //或
+      //var text = html_str.replace(/<[^<>]+>/g,"");
+      return text;
+    }
+  },
+  mounted() {
+    if (!window.localStorage.getItem("publishId")) {
+      this.$post("http://www.imuguang.com/api/upload/art/publish").then(res => {
+        console.log(res);
+        if (res.code == 0) {
+          window.localStorage.setItem("publishId", res.data.id);
+        }
+      });
     }
   }
 };
 </script>
 <style>
 #app {
+  width: 100vw;
+  overflow-x: hidden;
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   /* margin-top: 60px; */
+}
+.tab-load {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 29px 52px;
+}
+.tab-load > span {
+  font-size: 52px;
+  color: rgba(73, 73, 73, 1);
+  line-height: 73px;
+}
+.tab-load > i {
+  width: 37px;
+  height: 69px;
+  display: block;
+  background: #ddd;
+}
+.submit-load {
+  display: flex;
+  align-items: center;
+}
+.submit-load p {
+  display: flex;
+  align-items: center;
+  font-size: 46px;
+  font-weight: 600;
+  color: rgba(58, 135, 230, 1);
+  line-height: 65px;
+}
+.submit-load p:before {
+  content: " ";
+  display: inline-block;
+  width: 40px;
+  height: 38px;
+  background: #ddd;
 }
 .dove-cover {
   position: relative;
@@ -271,6 +383,7 @@ export default {
   box-sizing: border-box;
 }
 .dove-title input {
+  border: none;
   width: 100%;
   font-size: 52px;
   font-family: PingFangSC-Semibold;
@@ -284,9 +397,9 @@ export default {
 }
 .dove-content {
   width: 1242px;
-  height: 1373px;
+  height: 1580px;
   padding: 55px 70px;
-  margin-bottom: 144px;
+  padding-bottom: 214px;
   box-sizing: border-box;
   outline: none;
 }

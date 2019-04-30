@@ -11,7 +11,7 @@ module.exports = {
               viewportHeight: 2188,
               unitPrecision: 5,
               viewportUnit: 'vw' ,
-              selectorBlackList: ['.ignore','.hairlines'],
+              selectorBlackList: ['van-toast','van-toast--text','van-toast--middle','.ignore','.hairlines'],
               minPixelValue: 1,
               mediaQuery: false
            }

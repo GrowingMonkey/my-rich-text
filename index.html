@@ -2,9 +2,25 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
     <link rel="stylesheet" href="./static/reset.css">
     <title>upapp</title>
+    <script>
+    //页面加载的时候ios调用该方法设置header
+    function getToken(data){
+      if(data){
+        window.localStorage.setItem("header",JSON.stringify(data));
+      }
+    }
+    // alert(JSON.parse(window.dove.getHead()).user_agent);
+    // alert(JSON.parse(window.dove.getHead()).token);
+    //安卓设置header
+    if(navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1){
+      let header='{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}';
+      window.localStorage.setItem("header",header);
+      // window.localStorage.setItem("header",window.dove.getHead());
+    }
+    </script>
   </head>
   <body>
     <div id="app"></div>
