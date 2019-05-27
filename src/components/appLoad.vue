@@ -104,7 +104,7 @@ export default {
         formData.append("type", 0);
         console.log(formData);
         that
-          .upImage("http://www.imuguang.com/api/upload/art/upload", formData)
+          .upImage("你的图片上传地址", formData)
           .then(res => {
             console.log(res);
             if (res.code == 0) {
@@ -249,7 +249,7 @@ export default {
         content: this.text,
         detail: this.getDetail(this.text)
       };
-      this.$post("http://www.imuguang.com/api/upload/art/commit", data).then(
+      this.$post("发布地址", data).then(
         Response => {
           Toast(Response.message);
           if(Response.code==0){
@@ -269,7 +269,7 @@ export default {
   },
   mounted() {
     if (!window.localStorage.getItem("publishId")) {
-      this.$post("http://www.imuguang.com/api/upload/art/publish").then(res => {
+      this.$post("发布id地址").then(res => {
         console.log(res);
         if (res.code == 0) {
           window.localStorage.setItem("publishId", res.data.id);
