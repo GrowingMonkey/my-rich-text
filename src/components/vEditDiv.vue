@@ -79,34 +79,70 @@ export default {
 </script>
 <style lang="scss" rel="stylesheet/scss">
 .edit-div {
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  word-break: break-all;
-  font-size: 42px;
-  outline: none;
-  user-select: text;
-  white-space: pre-wrap;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: auto !important;
+  word-break: break-all !important;
+  font-size: 42px !important;
+  outline: none !important;
+  user-select: text !important;
+  white-space: pre-wrap !important;
   // text-align: left;
   &[contenteditable="true"] {
     user-modify: read-write-plaintext-only;
     &:empty:before {
       content: attr(placeholder);
-      display: block;
-      color: #ccc;
+      display: block !important;
+      color: #ccc !important;
     }
   }
 }
 .edit-div .img-box {
-  width: 100%;
-  text-align: center;
+  width: 100% !important;
+  text-align: center !important;
 }
 .edit-div .img-box img {
-  padding: 55px 0;
-  width: 100%;
+  padding: 55px 0 !important;
+  width: 100% !important;
+  color: #000 !important;
 }
-.edit-div > p {
-  line-height: 2;
+.edit-div>p{
+  line-height: 2 !important;
+  letter-spacing: .5px !important;
+}
+.edit-div  span {
+  font-size: 42px !important;
+  line-height: 2 !important;
+  color: #000 !important;
+}
+.edit-div p img{
+  display: block !important;
+  margin: 0 auto !important;
+}
+.edit-div  h1 {
+  font-size: 42px !important;
+  line-height: 2 !important;
+  color: #000 !important;
+}
+.edit-div  h2 {
+  font-size: 42px !important;
+  line-height: 2 !important;
+  color: #000 !important;
+}
+.edit-div  h3 {
+  font-size: 42px !important;
+  line-height: 2 !important;
+  color: #000 !important;
+}
+.edit-div  h4 {
+  font-size: 42px !important;
+  line-height: 2 !important;
+  color: #000 !important;
+}
+.edit-div  div {
+  font-size: 42px !important;
+  line-height: 2 !important;
+  color: #000 !important;
 }
 </style>

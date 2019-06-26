@@ -1,10 +1,14 @@
 import axios from 'axios';
 import qs from 'qs';
+import JSONbig from 'json-bigint';
 
 axios.defaults.timeout = 5000;
 axios.defaults.baseURL = 'http://www.imuguang.com/api/user';
-
-
+// axios.defaults.baseURL = 'http://192.168.1.107:9090/user';
+axios.defaults.transformResponse=function (data) {
+  // 对 data 进行任意转换处理
+  return JSONbig.parse(data);
+},
 //http request 拦截器
 axios.interceptors.request.use(
   config => {
@@ -23,6 +27,7 @@ axios.interceptors.request.use(
     console.log(config.headers);
     if(id){
       config.headers['publish-id']=id;
+      // alert(JSON.stringify(config.headers));
     }
     return config;
   },
@@ -35,6 +40,7 @@ axios.interceptors.request.use(
 //http response 拦截器
 axios.interceptors.response.use(
   response => {
+    console.log(response);
     if (response.data.errCode == 2) {
       router.push({
         path: "/login",
@@ -46,7 +52,7 @@ axios.interceptors.response.use(
     return response;
   },
   error => {
-    return Promise.reject(error)
+    return error;
   }
 )
 
@@ -84,6 +90,7 @@ export function post(url, data = {}) {
   return new Promise((resolve, reject) => {
     axios.post(url, qs.stringify(data))
       .then(response => {
+        console.log(response.data);
         resolve(response.data);
       }, err => {
         reject(err)

@@ -10,8 +10,11 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "ali-oss": "^6.1.1",
     "axios": "^0.18.0",
+    "json-bigint": "^0.3.0",
     "node-sass": "^4.11.0",
+    "qs": "^6.7.0",
     "vant": "^1.6.16",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1"

@@ -45,4 +45,12 @@ export default {
   height: 100vh;
   overflow-y: hidden;
 }
+input::-webkit-input-placeholder {
+        /* placeholder颜色  */
+        color: #aab2bd;
+        /* placeholder字体大小  */
+        /* font-size: 12px; */
+        /* placeholder位置  */
+        /* text-align: right; */
+    }
 </style>

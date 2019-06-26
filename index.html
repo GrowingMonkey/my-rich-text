@@ -1,29 +1,72 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
-    <link rel="stylesheet" href="./static/reset.css">
-    <title>upapp</title>
-    <script>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="./static/reset.css">
+  <!-- <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script> -->
+  <!-- <script src='http://gosspublic.alicdn.com/aliyun-oss-sdk-4.4.4.min.js'></script> -->
+  <title>upapp</title>
+  <script>
     //页面加载的时候ios调用该方法设置header
-    function getToken(data){
-      if(data){
-        window.localStorage.setItem("header",JSON.stringify(data));
+    window.localStorage.clear();
+    function getToken(data) {
+      if (data) {
+        let headers = {};
+        headers.token = data["token"];
+        headers.user_agent = JSON.parse(decodeURIComponent(data["user_agent"]));
+        let headStr =
+          '{"user_agent":"Version:' +
+          headers.user_agent.Version +
+          ":Device:" +
+          headers.user_agent.Device +
+          ":Type:" +
+          headers.user_agent.Type +
+          '","token":"' +
+          data["token"] +
+          '"}';
+        window.localStorage.setItem("header", headStr);
       }
     }
-    // alert(JSON.parse(window.dove.getHead()).user_agent);
-    // alert(JSON.parse(window.dove.getHead()).token);
-    //安卓设置header
-    if(navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1){
-      let header='{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}';
-      window.localStorage.setItem("header",header);
-      // window.localStorage.setItem("header",window.dove.getHead());
+
+    function GetRequest() {
+      let url = window.location.search?window.location.search:window.location.hash; //获取url中"?"符后的字串 
+      if(url.indexOf('#')!=-1){
+        url=url.slice(2);
+      } 
+      let theRequest = new Object();
+      if (url.indexOf("?") != -1) {
+        let str = url.substr(1);
+        let strs = str.split("&");
+        for (var i = 0; i < strs.length; i++) {
+          theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+      }
+      return theRequest;
     }
-    </script>
-  </head>
-  <body>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+    // alert(222);
+    if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1) {
+      // let header='{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}';
+      // window.localStorage.setItem("header",header);
+      // alert(111);
+      let obj={
+        token:GetRequest().token,
+        user_agent:GetRequest().user_agent
+      }
+      window.localStorage.setItem("header", JSON.stringify(obj));
+    }
+
+  </script>
+</head>
+
+<body>
+  <div id="app"></div>
+</body>
+<script src="./static/lib/crypto1/crypto/crypto.js"></script>
+<script src="./static/lib/crypto1/hmac/hmac.js"></script>
+<script src="./static/lib/crypto1/sha1/sha1.js"></script>
+<script src="./static/lib/base64.js"></script>
+
 </html>

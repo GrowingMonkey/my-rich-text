@@ -1,21 +1,21 @@
 <template>
   <div>
     <div class="tab-load">
-      <i @click="window.dove.closePage()"></i>
+      <i @click="returnPage"></i>
       <span>编辑</span>
-      <div class="submit-load" @click="submitForm">
+      <button class="submit-load" @click.stop.prevent="submitForm" :disabled="isDisable">
         <p>发表</p>
-      </div>
+      </button>
     </div>
     <div class="dove-cover">
-      <img :src="coverUrl" v-if="coverUrl">
+      <img :src="'http://file-t.imuguang.com/'+coverUrl" v-if="coverUrl" crossorigin="anonymous" :data-src='coverUrl'>
       <label class="cover-btn button is-danger" :class="{'active':!firstUp}">
         选择封面
         <input type="file" @change="onFileChange" accept="image/*" name="cover">
       </label>
     </div>
     <p class="dove-title">
-      <input type="text" placeholder="请输入标题" v-model="title">
+      <input type="text" placeholder="请输入标题" v-model="title"  maxlength="30">
     </p>
     <div class="dove-content">
       <v-edit-div v-model="text"></v-edit-div>
@@ -32,26 +32,190 @@
 </template>
 <script>
 import axios from "axios";
+// import OSS from 'ali-oss';
 import { Toast } from "vant";
 import vEditDiv from "./vEditDiv";
+import qs from "qs";
 export default {
   name: "appLoad",
   data() {
     return {
+      toast:'',
+      btncount:0,
       filesType: "",
       firstUp: true,
       imageUrl: "",
+      isDisable: false,//表单重复提交
       coverUrl: "",
+      coverImg: "",
       title: "",
       positionImg: "",
+      times:1,
       htmlContent: '<p style="color:rgba(175,175,175,1);">请输入正文</p>',
-      text: "<p> </p>"
+      text: "<p> </p>",
+      token:'',
     };
   },
   components: {
     vEditDiv
   },
+  mounted() {
+    // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
+    // this.token=JSON.parse(window.localStorage.header).token;
+  },
   methods: {
+    //web直签上传oss；
+    get_signature(signatureObj,file,fileType) {
+      let accessid= signatureObj.accessKeyId;
+      let accesskey= signatureObj.accessKeySecret;
+      let token = signatureObj.securityToken;
+      let time=signatureObj.expiration;
+      let that=this;
+      let body = signatureObj;
+      console.log(body);
+      let host='http://imuguang-file.oss-cn-shenzhen.aliyuncs.com';
+      let policyText ={
+        "expiration": time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
+        "conditions": [
+          ["content-length-range", 0, 1048576000] // 设置上传文件的大小限制
+        ]
+      };
+      // let callbackbody=(res)=>{
+      //   console.log(res);
+      // }
+      let policyBase64 = Base64.encode(JSON.stringify(policyText))
+      let message = policyBase64
+      console.log(message)
+      console.log(accesskey);
+      let bytes = Crypto.HMAC(Crypto.SHA1, message, accesskey, { asBytes: true }) ;
+      console.log(bytes);
+      let signature = Crypto.util.bytesToBase64(bytes);
+      let newFileName=`img/${that.uuid()}${fileType}`;
+      //组装发送数据
+      let request = new FormData();
+      request.append("name",`${file.name}`);
+       request.append("key",newFileName);
+      request.append("OSSAccessKeyId",accessid); //Bucket 拥有者的Access Key Id。
+      request.append("x-oss-security-token", token); //Bucket 拥有者的Access Key Id。
+      request.append("policy", policyBase64); //policy规定了请求的表单域的合法性
+      request.append("Signature",signature); //根据Access Key Secret和policy计算的签名信息，OSS验证该签名信息从而验证该Post请求的合法性
+      //---以上都是阿里的认证策略
+      // request.append("key", 'img/g_object_name'); //文件名字，可设置路径
+      request.append("success_action_status", "200"); // 让服务端返回200,不然，默认会返回204
+      request.append("file", file); //需要上传的文件 file
+      // request.append("callback", callbackbody);
+      axios({
+          url: host,
+          method: "post",
+          data: request,
+          headers: {
+            'content-type':'multipart/form-data'
+          }
+        }).then(res=>{
+         if(res){
+            var req = null;
+	          if(window.XMLHttpRequest){
+		          req = new XMLHttpRequest();
+	          }else{
+		          req = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            req.send();
+            req.onreadystatechange = function(){
+              if (req.readyState == 4 && req.status == 200){
+		            // 返回的结果，类型是 string 
+                if (that.positionImg !== "cover") {
+                        that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${
+                          newFileName
+                        }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                } else {
+                        that.firstUp = false;
+                        that.coverUrl = newFileName;
+                }
+                   Toast.clear();
+              }else{
+                  // Toast("上传失败");
+              }
+                
+              }
+            }
+        }).catch(err=>{
+          if(err){
+            var req = null;
+	          if(window.XMLHttpRequest){
+		          req = new XMLHttpRequest();
+	          }else{
+		          req = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            req.send();
+            req.onreadystatechange = function(){
+              if (req.readyState == 4 && req.status == 200){
+		            // 返回的结果，类型是 string 
+                      if (that.positionImg !== "cover") {
+                        that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${
+                          newFileName
+                        }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                      } else {
+                        that.firstUp = false;
+                        that.coverUrl = newFileName;
+                      }
+                      Toast.clear();
+	              }else{
+                  // Toast("上传失败");
+                }
+              }
+            }
+          });
+    },
+
+    uuid() {
+      let s = [];
+      let hexDigits = "56789abcdefghijk";
+      for (let i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+      }
+      s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      s[8] = s[13] = s[18] = s[23] = "-";
+      let uuid = s.join("");
+      uuid = uuid.replace(/[-]/g, "");
+      return uuid;
+    },
+    getpublishId() {
+      return new Promise((reject, resolve) => {
+        if (!window.localStorage.getItem("publishId")) {
+          this.$post("http://www.imuguang.com/api/upload/art/publish").then(
+            res => {
+              if (res.code == 0) {
+                window.localStorage.setItem("publishId", res.data.id);
+                reject(res);
+              } else {
+                reject(res);
+              }
+            }
+          );
+        } else {
+          reject({ code: 0 });
+        }
+      });
+    },
+    returnPage() {
+      if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1){
+        if(this.times!=1){
+           window.location.href='jsbridge://www.imuguang.com/timeClose'
+        }      
+        // alert(window.dove.closePage);
+        else{
+          window.dove.closePage();
+        }
+      } else {
+        //   window.webkit.messageHandlers.方法名(与注册的一致(message.name) ).postMessage(JS传下来的数据(message.body))
+        //    data 可以是数组 字典 json字符串.....
+        //   window.webkit.messageHandlers.testAction.postMessage(data)
+        window.webkit.messageHandlers.closePage.postMessage("这是前端传值");
+      }
+    },
     scanContent(e) {
       let cursorPosition = this.getCursortPosition(this.$refs.framework);
       this.htmlContent = this.$refs.framework.innerHTML;
@@ -78,11 +242,110 @@ export default {
       this.createImage(file);
     },
     onFileChange(e) {
-      console.log(e.target);
-      console.log(e.target.files[0].type);
-      this.filesType = e.target.files[0].type;
+      let that = this;
       this.positionImg = e.target.getAttribute("name");
-      this.validateImageFile(e.target.files);
+      this.filesType = e.target.files[0].type;
+      let file = e.target.files[0];
+      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
+		  if(!imgStr.test(file.name)) {
+			  alert("文件不是图片类型");
+			  return false;
+      }
+      that.toast = Toast.loading({
+        duration: 0,       // 持续展示 toast
+        forbidClick: true, // 禁用背景点击
+        loadingType: 'spinner',
+        message: '上传中'
+      });
+      let reader = new FileReader();
+      //file转base64
+      reader.readAsDataURL(file);
+      reader.onload = function(e) {
+        let base64Img = e.target.result;
+        let arr = base64Img.split(",");
+        let currentFile = arr[1];
+        this.imageUrl = e.target.result;
+        //图片转blob
+        let blobFile =
+          typeof currentFile === "string"
+            ? that.convertToBlob(currentFile, that.filesType)
+            : currentFile;
+        //获取发布id
+        that.getpublishId().then(res => {
+          if (res.code != 0) {
+            alert(res.message);
+            alert("服务端错误");
+            that.returnPage();
+          }
+          //获取上传oss秘钥
+          that
+            .$post("http://www.imuguang.com/api/upload/pic/getSTSToken")
+            .then(res => {
+              let store = JSON.parse(res.data);
+              console.log(store);
+              //oss直传
+              let fileType="." + file.name.split(".")[1];
+              that.get_signature(store,file,fileType);
+              // let client = new OSS.Wrapper({
+              //   accessKeyId: store.accessKeyId,
+              //   accessKeySecret: store.accessKeySecret,
+              //   stsToken: store.securityToken,
+              //   endpoint: "http://oss-cn-shenzhen.aliyuncs.com",
+              //   bucket: "imuguang-file"
+              // });
+              // let snowFileName = that.uuid();
+              // let fileType = "." + file.name.split(".")[1];
+              // let reader2 = new FileReader();
+              // //blob转bufffer
+              // reader2.readAsArrayBuffer(blobFile);
+              // reader2.onload = function(e) {
+              //   let buffer = new OSS.Buffer(event.target.result);
+              //   //上传
+              //   alert(2);
+              //   alert(JSON.stringify(client));
+              //   console.log(JSON.stringify(client));
+              //   alert(JSON.stringify(client.put));
+              //   client.put(`img/${snowFileName}${fileType}`, buffer).then(results => {
+              //       console.log(232);
+              //       alert(JSON.stringify(results));
+              //       if (results.res.status == 200) {
+              //         let url=results.res.requestUrls[0];
+              //         url=url.replace(/http:\/\/[^\/]*\//, "");
+              //         if (that.positionImg !== "cover") {
+              //           that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${
+              //             url
+              //           }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+              //         } else {
+              //           that.firstUp = false;
+              //           that.coverUrl = url;
+              //         }
+              //         Toast("上传成功");
+              //       }
+              //     }).catch(err=>{
+              //       console.log(err);
+              //     });
+              // };
+            });
+        });
+      };
+    },
+    //base64转blob
+    dataURItoBlob(base64Data) {
+      var byteString;
+      if (base64Data.split(",")[0].indexOf("base64") >= 0) {
+        byteString = atob(base64Data.split(",")[1]);
+      } else {
+        byteString = unescape(base64Data.split(",")[1]);
+        var mimeString = base64Data
+          .split(",")[0]
+          .split(":")[1]
+          .split(";")[0];
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+      }
+      return new Blob([ia], { type: mimeString });
     },
     createImage(file) {
       let that = this;
@@ -92,54 +355,90 @@ export default {
         let base64Img = e.target.result;
         let arr = base64Img.split(",");
         let currentFile = arr[1];
-        console.log(arr[1]);
         this.imageUrl = e.target.result;
         let blobFile =
           typeof currentFile === "string"
             ? that.convertToBlob(currentFile, that.filesType)
             : currentFile;
-        console.log(blobFile);
-        let formData = new FormData();
-        formData.append("file", blobFile);
-        formData.append("type", 0);
-        console.log(formData);
-        that
-          .upImage("http://www.imuguang.com/api/upload/art/upload", formData)
-          .then(res => {
-            console.log(res);
-            if (res.code == 0) {
-              if (that.positionImg !== "cover") {
-                that.text += `<p class="img-box"><img src="${
-                  res.data.displayUrl
-                    ? "http://www.imuguang.com/img/" + res.data.displayUrl
-                    : that.imageUrl
-                }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
-              } else {
-                that.firstUp = false;
-                that.coverUrl = `${
-                  res.data.displayUrl
-                    ? "http://www.imuguang.com/img/" + res.data.displayUrl
-                    : that.imageUrl
-                }`;
-              }
-              Toast(res);
-            }
-          });
+        this.getpublishId().then(res => {
+          if (res.code != 0) {
+            alert("服务端错误");
+            that.returnPage();
+          }
+          that
+            .$post("http://www.imuguang.com/api/upload/pic/getSTSToken")
+            .then(res => {
+              let store = JSON.parse(res.data);
+              let client = new OSS.Wrapper({
+                accessKeyId: store.accessKeyId,
+                accessKeySecret: store.accessKeySecret,
+                stsToken: store.securityToken,
+                endpoint: "http://oss-cn-shenzhen.aliyuncs.com",
+                bucket: "imuguang-file"
+              });
+              console.log(store);
+              console.log(blobFile);
+              const readers = new FileReader();
+              readers.readAsArrayBuffer(blobFile);
+              readers.onload = function(event) {
+                const buffer = new OSS.Buffer(event.target.result);
+                client.put("img/dsd.png", buffer).then(re => {
+                  console.log(re);
+                });
+              };
+              // let result=client.put('dsd.png',blobFile);
+              // console.log(a);
+            });
+          // that.upImage("http://www.imuguang.com/api/upload/art/upload", formData).then(res => {
+          //     console.log(res);
+          //     if (res.code == 0) {
+          //       if (that.positionImg !== "cover") {
+          //         that.text += `<p class="img-box"><img src="${
+          //           res.data.displayUrl
+          //             ? "http://www.imuguang.com/img/" + res.data.displayUrl
+          //             : that.imageUrl
+          //         }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+          //       } else {
+          //         that.firstUp = false;
+          //         that.coverUrl = `${
+          //           res.data.displayUrl
+          //             ? "http://www.imuguang.com/img/" + res.data.displayUrl
+          //             : that.imageUrl
+          //         }`;
+          //       }
+          //       Toast(res);
+          //     }
+          //   });
+        });
       };
     },
+    // async multipartUpload(client,file) {
+
+    //     try {
+    //       let result = await client.multipartUpload('dsda.png',file);
+    //       console.log(result);
+    //     } catch(e){
+    //       console.log(e);
+    //     }
+    // },
     upImage(url, data) {
-      let appHeaders = JSON.parse(window.localStorage.getItem("header"));
-      let otherHeader = {
-        "Content-Type": "multipart/form-data",
-        "publish-id": window.localStorage.getItem("publishId")
-      };
-      let currentHearder=Object.assign(appHeaders,otherHeader);
       return new Promise((resolve, reject) => {
+        let ids = window.localStorage.getItem("publishId");
+
+        let appHeaders = JSON.parse(window.localStorage.getItem("header"));
+
+        let otherHeader = {
+          "Content-Type": "multipart/form-data",
+          "publish-id": ids
+          // "user_agent":appHeaders.user_agent
+        };
+        let currentHearder = Object.assign(appHeaders, otherHeader);
+
         axios({
           url: url,
           method: "post",
           data: data,
-          headers:currentHearder 
+          headers: currentHearder
         }).then(
           response => {
             resolve(response.data);
@@ -241,40 +540,61 @@ export default {
     },
     //定义app调用的方法
     submitForm() {
-      console.log(this.coverImg);
-      console.log(this.title);
-      console.log(this.text);
-      let data = {
-        title: this.title,
-        content: this.text,
-        detail: this.getDetail(this.text)
-      };
-      this.$post("http://www.imuguang.com/api/upload/art/commit", data).then(
-        Response => {
-          Toast(Response.message);
-          if(Response.code==0){
-             window.localStorage.setItem("publishId", "");
-            window.dove.closePage();
+      let that = this;
+      that.isDisable = true; 
+      this.getpublishId().then(res => {
+        if (res.code != 0) {
+          alert("服务端错误");
+          that.returnPage();
+        } else {
+          if (!that.title) {
+            Toast({message:'请输入标题',duration:1000});
+            that.isDisable = false; 
+            return;
           }
+          if (that.text == "<p> </p>") {
+            that.isDisable = false; 
+            Toast({message:'请输入内容',duration:1000});
+            return;
+          }
+          let detail = that.getDetail(that.text).substring(0,100);
+          console.log(detail);
+          if (detail.replace(/\s/g, "") == "") {
+            Toast({message:'请输入文字',duration:1000});
+            that.isDisable = false; 
+            return;
+          }
+          let data = {
+            bgpUrl: that.coverUrl&&that.coverUrl!==''?that.coverUrl:`bg/${Math.floor(Math.random()*5)+1}.jpg`,
+            title: that.title,
+            content: that.text.replace(/\n/g, "<br/>"),
+            detail: that.getDetail(that.text).substring(0,100)
+          };
+          that
+            .$post("http://www.imuguang.com/api/upload/art/commit", data)
+            .then(Response => {
+              if (Response.code == 0) {
+                window.localStorage.setItem("publishId", "");
+                that.times+=1;
+               that.returnPage();
+              }
+              else{
+                Toast({message:Response.message,duration:1000});
+              }
+              that.isDisable = false; 
+            });
         }
-      );
+      });
     },
     getDetail(html) {
       let re = new RegExp("<[^<>]+>", "g");
       let text = html.replace(re, "");
+      if (text == "") {
+        Toast({message:'请输入文字',duration:1000});
+      }
       //或
       //var text = html_str.replace(/<[^<>]+>/g,"");
       return text;
-    }
-  },
-  mounted() {
-    if (!window.localStorage.getItem("publishId")) {
-      this.$post("http://www.imuguang.com/api/upload/art/publish").then(res => {
-        console.log(res);
-        if (res.code == 0) {
-          window.localStorage.setItem("publishId", res.data.id);
-        }
-      });
     }
   }
 };
@@ -290,6 +610,7 @@ export default {
   /* margin-top: 60px; */
 }
 .tab-load {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -297,6 +618,12 @@ export default {
   padding: 29px 52px;
 }
 .tab-load > span {
+  position: absolute;
+  left: 50%; 
+  top: 50%;
+  transform: translate(-50%, -50%); /* 50%为自身尺寸的一半 */
+  -webkit-transform: translate(-50%, -50%);
+  margin: 0 auto;
   font-size: 52px;
   color: rgba(73, 73, 73, 1);
   line-height: 73px;
@@ -305,11 +632,14 @@ export default {
   width: 37px;
   height: 69px;
   display: block;
-  background: #ddd;
+  background: url("../../static/fanhui.svg") no-repeat;
+  background-size: 100%;
 }
 .submit-load {
   display: flex;
   align-items: center;
+  border: none;
+  background: #fff;
 }
 .submit-load p {
   display: flex;
@@ -324,7 +654,9 @@ export default {
   display: inline-block;
   width: 40px;
   height: 38px;
-  background: #ddd;
+  margin-right: 14px;
+  background: url("../../static/fasong.svg");
+  background-size: 100%;
 }
 .dove-cover {
   position: relative;
@@ -388,7 +720,7 @@ export default {
   font-size: 52px;
   font-family: PingFangSC-Semibold;
   font-weight: 600;
-  color: rgba(175, 175, 175, 1);
+  color:#000;
   line-height: 73px;
   outline: none;
 }
@@ -397,9 +729,10 @@ export default {
 }
 .dove-content {
   width: 1242px;
-  height: 1580px;
+  /* height: 1580px; */
+  height: calc(100vh - 190px - 300px);
   padding: 55px 70px;
-  padding-bottom: 214px;
+  padding-bottom: 300px;
   box-sizing: border-box;
   outline: none;
 }
