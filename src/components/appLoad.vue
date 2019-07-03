@@ -1,30 +1,46 @@
 <template>
   <div>
-    <div class="tab-load">
-      <i @click="returnPage"></i>
-      <span>编辑</span>
-      <button class="submit-load" @click.stop.prevent="submitForm" :disabled="isDisable">
-        <p>发表</p>
-      </button>
+    <div class="fixedClass">
+      <div style="position: relative;top:0;">
+        <div class="tab-load">
+          <i @click="returnPage"></i>
+          <span>编辑</span>
+          <button class="submit-load" @click.stop.prevent="submitForm" :disabled="isDisable">
+            <p>发表</p>
+          </button>
+        </div>
+        <div class="dove-cover">
+          <img
+            :src="'http://file-t.imuguang.com/'+coverUrl+'?x-oss-process=image/resize,w_375,h_300,m_fill'"
+            v-if="coverUrl"
+            crossorigin="anonymous"
+            :data-src="coverUrl"
+          >
+          <label class="cover-btn button is-danger" :class="{'active':!firstUp}">
+            选择封面
+            <input type="file" @change="onFileChange" accept="image/*" name="cover">
+          </label>
+        </div>
+        <p class="dove-title" @click="changeStyle">
+          <span :class="{'active':!boolStyle}">请输入标题</span>
+          <input type="text" ref="title" v-model="title" maxlength="20">
+        </p>
+      </div>
     </div>
-    <div class="dove-cover">
-      <img :src="'http://file-t.imuguang.com/'+coverUrl" v-if="coverUrl" crossorigin="anonymous" :data-src='coverUrl'>
-      <label class="cover-btn button is-danger" :class="{'active':!firstUp}">
-        选择封面
-        <input type="file" @change="onFileChange" accept="image/*" name="cover">
-      </label>
-    </div>
-    <p class="dove-title">
-      <input type="text" placeholder="请输入标题" v-model="title"  maxlength="30">
-    </p>
-    <div class="dove-content">
+    <div class="dove-content" @click="changeStyle2" :style="{height:contentHeight}">
+      <span :class="{'active':!boolStyle2}">请输入正文</span>
       <v-edit-div v-model="text"></v-edit-div>
     </div>
+    <div style="clear:both"></div>
     <div class="dove-footer">
       <div class="btn-box">
         <label class="up-btn">
-          图文
-          <input type="file" accept="image/*" @change="onFileChange" name="imgContent">
+          <input
+            type="file"
+            accept="image/*"
+            @change="onFileChange"
+            name="imgContent"
+          >
         </label>
       </div>
     </div>
@@ -40,20 +56,24 @@ export default {
   name: "appLoad",
   data() {
     return {
-      toast:'',
-      btncount:0,
+      toast: "",
+      btncount: 0,
       filesType: "",
       firstUp: true,
       imageUrl: "",
-      isDisable: false,//表单重复提交
+      isDisable: false, //表单重复提交
       coverUrl: "",
+      originUrl: "http://www.imuguang.com",
       coverImg: "",
       title: "",
       positionImg: "",
-      times:1,
+      times: 1,
       htmlContent: '<p style="color:rgba(175,175,175,1);">请输入正文</p>',
-      text: "<p> </p>",
-      token:'',
+      text: "<p><br></p>",
+      token: "",
+      boolStyle: true,
+      boolStyle2: true,
+      contentHeight:'calc(100vh - 15.29791vw - 24.15459vw)',
     };
   },
   components: {
@@ -62,111 +82,136 @@ export default {
   mounted() {
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
+    let header = JSON.parse(window.localStorage.getItem("header"));
+    this.originUrl =header && header.originUrl ? header.originUrl : window.location.origin;
   },
   methods: {
+    changeStyle() {
+      this.boolStyle = false;
+      this.$refs.title.focus();
+    },
+    changeStylef() {
+      this.boolStyle = true;
+      this.$refs.title.focus();
+    },
+    changeStyle2() {
+      this.boolStyle2 = false;
+    },
+    changeStyle2f() {
+      this.boolStyle2 = true;
+    },
     //web直签上传oss；
-    get_signature(signatureObj,file,fileType) {
-      let accessid= signatureObj.accessKeyId;
-      let accesskey= signatureObj.accessKeySecret;
+    get_signature(signatureObj, file, fileType) {
+      let accessid = signatureObj.accessKeyId;
+      let accesskey = signatureObj.accessKeySecret;
       let token = signatureObj.securityToken;
-      let time=signatureObj.expiration;
-      let that=this;
+      let time = signatureObj.expiration;
+      let that = this;
       let body = signatureObj;
       console.log(body);
-      let host='http://imuguang-file.oss-cn-shenzhen.aliyuncs.com';
-      let policyText ={
-        "expiration": time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
-        "conditions": [
+      let host = "http://imuguang-file.oss-cn-shenzhen.aliyuncs.com";
+      let policyText = {
+        expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
+        conditions: [
           ["content-length-range", 0, 1048576000] // 设置上传文件的大小限制
         ]
       };
       // let callbackbody=(res)=>{
       //   console.log(res);
       // }
-      let policyBase64 = Base64.encode(JSON.stringify(policyText))
-      let message = policyBase64
-      console.log(message)
+      let policyBase64 = Base64.encode(JSON.stringify(policyText));
+      let message = policyBase64;
+      console.log(message);
       console.log(accesskey);
-      let bytes = Crypto.HMAC(Crypto.SHA1, message, accesskey, { asBytes: true }) ;
+      let bytes = Crypto.HMAC(Crypto.SHA1, message, accesskey, {
+        asBytes: true
+      });
       console.log(bytes);
       let signature = Crypto.util.bytesToBase64(bytes);
-      let newFileName=`img/${that.uuid()}${fileType}`;
+      let newFileName = `img/${that.uuid()}${fileType}`;
       //组装发送数据
       let request = new FormData();
-      request.append("name",`${file.name}`);
-       request.append("key",newFileName);
-      request.append("OSSAccessKeyId",accessid); //Bucket 拥有者的Access Key Id。
+      request.append("name", `${file.name}`);
+      request.append("key", newFileName);
+      request.append("OSSAccessKeyId", accessid); //Bucket 拥有者的Access Key Id。
       request.append("x-oss-security-token", token); //Bucket 拥有者的Access Key Id。
       request.append("policy", policyBase64); //policy规定了请求的表单域的合法性
-      request.append("Signature",signature); //根据Access Key Secret和policy计算的签名信息，OSS验证该签名信息从而验证该Post请求的合法性
+      request.append("Signature", signature); //根据Access Key Secret和policy计算的签名信息，OSS验证该签名信息从而验证该Post请求的合法性
       //---以上都是阿里的认证策略
       // request.append("key", 'img/g_object_name'); //文件名字，可设置路径
       request.append("success_action_status", "200"); // 让服务端返回200,不然，默认会返回204
       request.append("file", file); //需要上传的文件 file
       // request.append("callback", callbackbody);
       axios({
-          url: host,
-          method: "post",
-          data: request,
-          headers: {
-            'content-type':'multipart/form-data'
-          }
-        }).then(res=>{
-         if(res){
+        url: host,
+        method: "post",
+        data: request,
+        headers: {
+          "content-type": "multipart/form-data"
+        }
+      })
+        .then(res => {
+          if (res) {
             var req = null;
-	          if(window.XMLHttpRequest){
-		          req = new XMLHttpRequest();
-	          }else{
-		          req = new ActiveXObject("Microsoft.XMLHTTP");
+            if (window.XMLHttpRequest) {
+              req = new XMLHttpRequest();
+            } else {
+              req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
             req.send();
-            req.onreadystatechange = function(){
-              if (req.readyState == 4 && req.status == 200){
-		            // 返回的结果，类型是 string 
+            req.onreadystatechange = function() {
+              if (req.readyState == 4 && req.status == 200) {
+                // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
-                        that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${
-                          newFileName
-                        }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                  that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
                 } else {
-                        that.firstUp = false;
-                        that.coverUrl = newFileName;
+                  that.firstUp = false;
+                  that.coverUrl = newFileName;
+                  that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw)";
                 }
-                   Toast.clear();
-              }else{
-                  // Toast("上传失败");
+                Toast.clear();
+              } else {
+                // Toast("上传失败");
+                // Toast({ message: '上传失败', duration: 1000 });
               }
-                
-              }
-            }
-        }).catch(err=>{
-          if(err){
+            };
+          }
+        })
+        .catch(err => {
+          if (err) {
             var req = null;
-	          if(window.XMLHttpRequest){
-		          req = new XMLHttpRequest();
-	          }else{
-		          req = new ActiveXObject("Microsoft.XMLHTTP");
+            if (window.XMLHttpRequest) {
+              req = new XMLHttpRequest();
+            } else {
+              req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
             req.send();
-            req.onreadystatechange = function(){
-              if (req.readyState == 4 && req.status == 200){
-		            // 返回的结果，类型是 string 
-                      if (that.positionImg !== "cover") {
-                        that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${
-                          newFileName
-                        }" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
-                      } else {
-                        that.firstUp = false;
-                        that.coverUrl = newFileName;
-                      }
-                      Toast.clear();
-	              }else{
-                  // Toast("上传失败");
+            req.onreadystatechange = function() {
+              if (req.readyState == 4 && req.status == 200) {
+                // 返回的结果，类型是 string
+                if (that.positionImg !== "cover") {
+                  that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+  
+                } else {
+                  that.firstUp = false;
+                  that.coverUrl = newFileName;
+                  that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw);";
                 }
+                Toast.clear();
+              } else {
+                // Toast("上传失败");
+                Toast.clear();
+      //           that.toast=Toast({
+      //   duration: 2000, // 持续展示 toast
+        
+      //   message: "上传失败"
+      // });
               }
-            }
-          });
+            };
+          }
+        });
     },
 
     uuid() {
@@ -183,30 +228,32 @@ export default {
       return uuid;
     },
     getpublishId() {
+      let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
-          this.$post("http://www.imuguang.com/api/upload/art/publish").then(
-            res => {
-              if (res.code == 0) {
-                window.localStorage.setItem("publishId", res.data.id);
-                reject(res);
-              } else {
-                reject(res);
-              }
+          this.$post(that.originUrl + "/api/upload/art/publish").then(res => {
+            if (res.code == 0) {
+              window.localStorage.setItem("publishId", res.data.id);
+              reject(res);
+            } else {
+              reject(res);
             }
-          );
+          });
         } else {
           reject({ code: 0 });
         }
       });
     },
     returnPage() {
-      if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1){
-        if(this.times!=1){
-           window.location.href='jsbridge://www.imuguang.com/timeClose'
-        }      
+      if (
+        navigator.userAgent.indexOf("Android") > -1 ||
+        navigator.userAgent.indexOf("Adr") > -1
+      ) {
+        if (this.times != 1) {
+          window.location.href = "jsbridge://www.imuguang.com/timeClose";
+        }
         // alert(window.dove.closePage);
-        else{
+        else {
           window.dove.closePage();
         }
       } else {
@@ -247,15 +294,15 @@ export default {
       this.filesType = e.target.files[0].type;
       let file = e.target.files[0];
       let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
-		  if(!imgStr.test(file.name)) {
-			  alert("文件不是图片类型");
-			  return false;
+      if (!imgStr.test(file.name)) {
+        alert("文件不是图片类型");
+        return false;
       }
       that.toast = Toast.loading({
-        duration: 0,       // 持续展示 toast
+        duration: 0, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
-        loadingType: 'spinner',
-        message: '上传中'
+        loadingType: "spinner",
+        message: "上传中"
       });
       let reader = new FileReader();
       //file转base64
@@ -273,19 +320,25 @@ export default {
         //获取发布id
         that.getpublishId().then(res => {
           if (res.code != 0) {
-            alert(res.message);
             alert("服务端错误");
+            alert(res.message);
+            Toast.clear();
             that.returnPage();
           }
           //获取上传oss秘钥
           that
-            .$post("http://www.imuguang.com/api/upload/pic/getSTSToken")
+            .$post(`${that.originUrl}/api/upload/pic/getSTSToken`)
             .then(res => {
+              if(res['code']!=0){
+                Toast({ message: '上传失败', duration: 1000 });
+              }else{
+
               let store = JSON.parse(res.data);
               console.log(store);
               //oss直传
-              let fileType="." + file.name.split(".")[1];
-              that.get_signature(store,file,fileType);
+              let fileType = "." + file.name.split(".")[1];
+              that.get_signature(store, file, fileType);
+              }
               // let client = new OSS.Wrapper({
               //   accessKeyId: store.accessKeyId,
               //   accessKeySecret: store.accessKeySecret,
@@ -363,10 +416,12 @@ export default {
         this.getpublishId().then(res => {
           if (res.code != 0) {
             alert("服务端错误");
+            alert(res.message);
+            Toast.clear();
             that.returnPage();
           }
           that
-            .$post("http://www.imuguang.com/api/upload/pic/getSTSToken")
+            .$post(`${that.originUrl}/api/upload/pic/getSTSToken`)
             .then(res => {
               let store = JSON.parse(res.data);
               let client = new OSS.Wrapper({
@@ -541,47 +596,49 @@ export default {
     //定义app调用的方法
     submitForm() {
       let that = this;
-      that.isDisable = true; 
+      that.isDisable = true;
       this.getpublishId().then(res => {
         if (res.code != 0) {
           alert("服务端错误");
           that.returnPage();
         } else {
           if (!that.title) {
-            Toast({message:'请输入标题',duration:1000});
-            that.isDisable = false; 
+            Toast({ message: "请输入标题", duration: 1000 });
+            that.isDisable = false;
             return;
           }
           if (that.text == "<p> </p>") {
-            that.isDisable = false; 
-            Toast({message:'请输入内容',duration:1000});
+            that.isDisable = false;
+            Toast({ message: "请输入内容", duration: 1000 });
             return;
           }
-          let detail = that.getDetail(that.text).substring(0,100);
+          let detail = that.getDetail(that.text).substring(0, 100);
           console.log(detail);
           if (detail.replace(/\s/g, "") == "") {
-            Toast({message:'请输入文字',duration:1000});
-            that.isDisable = false; 
+            Toast({ message: "请输入文字", duration: 1000 });
+            that.isDisable = false;
             return;
           }
           let data = {
-            bgpUrl: that.coverUrl&&that.coverUrl!==''?that.coverUrl:`bg/${Math.floor(Math.random()*5)+1}.jpg`,
+            bgpUrl:
+              that.coverUrl && that.coverUrl !== ""
+                ? that.coverUrl
+                : `bg/${Math.floor(Math.random() * 5) + 1}.jpg`,
             title: that.title,
             content: that.text.replace(/\n/g, "<br/>"),
-            detail: that.getDetail(that.text).substring(0,100)
+            detail: that.getDetail(that.text).substring(0, 100)
           };
           that
-            .$post("http://www.imuguang.com/api/upload/art/commit", data)
+            .$post(`${that.originUrl}/api/upload/art/commit`, data)
             .then(Response => {
               if (Response.code == 0) {
                 window.localStorage.setItem("publishId", "");
-                that.times+=1;
-               that.returnPage();
+                that.times += 1;
+                that.returnPage();
+              } else {
+                Toast({ message: Response.message, duration: 1000 });
               }
-              else{
-                Toast({message:Response.message,duration:1000});
-              }
-              that.isDisable = false; 
+              that.isDisable = false;
             });
         }
       });
@@ -590,16 +647,51 @@ export default {
       let re = new RegExp("<[^<>]+>", "g");
       let text = html.replace(re, "");
       if (text == "") {
-        Toast({message:'请输入文字',duration:1000});
+        Toast({ message: "请输入文字", duration: 1000 });
       }
       //或
       //var text = html_str.replace(/<[^<>]+>/g,"");
       return text;
     }
+  },
+  watch: {
+    // text(newV,oldV){
+    //   if(newV===''){
+    //     this.text='<p><br></p>'
+    //   }
+    //   if(newV.indexOf('<p>')==-1){
+    //     this.text='<p>'+newV+'</p>';
+    //   }
+    // }
+    title(newv, oldv) {
+      if (newv == "" && oldv != "") {
+        // this.changeStylef();
+      } else {
+        this.changeStyle();
+      }
+    },
+    text(newv, oldv) {
+      if (
+        (newv == "<p><br></p>" && oldv != "") ||
+        (newv == "" && oldv == "<p><br></p>")
+      ) {
+        // this.changeStyle2f();
+      } else {
+        this.changeStyle2();
+      }
+    }
   }
 };
 </script>
 <style>
+.fixedClass{
+  overflow: hidden;
+}
+.fixedClass::after{
+   clear: both;
+   display: block;
+   content: '';
+}
 #app {
   width: 100vw;
   overflow-x: hidden;
@@ -619,7 +711,7 @@ export default {
 }
 .tab-load > span {
   position: absolute;
-  left: 50%; 
+  left: 50%;
   top: 50%;
   transform: translate(-50%, -50%); /* 50%为自身尺寸的一半 */
   -webkit-transform: translate(-50%, -50%);
@@ -636,6 +728,7 @@ export default {
   background-size: 100%;
 }
 .submit-load {
+  margin-right: -2.12721vw;
   display: flex;
   align-items: center;
   border: none;
@@ -661,23 +754,28 @@ export default {
 .dove-cover {
   position: relative;
   width: 1242px;
-  height: 300px;
+  /* height: 600px; */
+  min-height: 300px;
+  max-height: 800px;
   overflow: hidden;
   background: rgba(246, 247, 249, 1);
 }
 .dove-cover .active {
   /* top: 90%;
   right: 10%; */
+  background: rgba(0, 0, 0, 0.5);
+
+  font-size: 40px;
   top: 80%;
   left: 80%;
   transform: translate(-20%, -50%);
-  padding: 10px;
+  padding: 18px;
   box-sizing: border-box;
   color: #000;
-  border: 1px solid #ddd;
+  /* border: 1px solid #ddd; */
   border-radius: 10px;
   cursor: pointer;
-  color: #fff;
+  color: #fff !important;
 }
 .dove-cover img {
   width: 100%;
@@ -710,31 +808,61 @@ export default {
   font-family: PingFangSC-Semibold;
   font-weight: 600;
   background: #ffffff;
-  border-bottom: 1px solid rgba(216, 216, 216, 1);
-  padding: 62px 58px 55px 58px;
+  border-bottom: 1px solid rgba(216, 216, 216, 0.5);
+  position: relative;
+  display: flex;
+  align-items: center;
   box-sizing: border-box;
 }
+.dove-title span {
+  padding-left: 70px;
+  font-size: 73px;
+  color: rgba(201, 201, 201, 1);
+  position: absolute;
+  display: block;
+}
+.dove-title .active {
+  display: none;
+}
 .dove-title input {
+  padding-left: 70px;
   border: none;
+  margin: 0;
   width: 100%;
-  font-size: 52px;
+  /* height: 73px; */
+  font-size: 73px;
+  -webkit-appearance: none;
   font-family: PingFangSC-Semibold;
   font-weight: 600;
-  color:#000;
-  line-height: 73px;
+  color: #000;
+  /* line-height: 1; */
   outline: none;
+  line-height: 73px;
+  background: #fff;
+  box-sizing: border-box;
+  font-size: 73px;
 }
 .dove-title input:focus {
   color: #000;
 }
 .dove-content {
+  position: relative;
   width: 1242px;
   /* height: 1580px; */
-  height: calc(100vh - 190px - 300px);
-  padding: 55px 70px;
+  padding: 42px 70px;
+
   padding-bottom: 300px;
   box-sizing: border-box;
   outline: none;
+}
+.dove-content > span {
+  position: absolute;
+  color: rgba(201, 201, 201, 1);
+  font-size: 52px;
+  line-height: 1.5;
+}
+.dove-content > .active {
+  display: none;
 }
 .dove-footer {
   position: fixed;
@@ -770,7 +898,7 @@ export default {
   content: " ";
   display: block;
   width: 62px;
-  margin-top: 9px;
+  /* margin-top: 9px; */
   height: 58px;
   background: url("../../static/up_img.png") no-repeat;
   background-size: 100%;

@@ -12,6 +12,7 @@
   <script>
     //页面加载的时候ios调用该方法设置header
     window.localStorage.clear();
+
     function getToken(data) {
       if (data) {
         let headers = {};
@@ -26,16 +27,18 @@
           headers.user_agent.Type +
           '","token":"' +
           data["token"] +
+          '","originUrl":"' +
+          data["originUrl"] + 
           '"}';
         window.localStorage.setItem("header", headStr);
       }
     }
 
     function GetRequest() {
-      let url = window.location.search?window.location.search:window.location.hash; //获取url中"?"符后的字串 
-      if(url.indexOf('#')!=-1){
-        url=url.slice(2);
-      } 
+      let url = window.location.search ? window.location.search : window.location.hash; //获取url中"?"符后的字串 
+      if (url.indexOf('#') != -1) {
+        url = url.slice(2);
+      }
       let theRequest = new Object();
       if (url.indexOf("?") != -1) {
         let str = url.substr(1);
@@ -48,12 +51,10 @@
     }
     // alert(222);
     if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1) {
-      // let header='{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}';
-      // window.localStorage.setItem("header",header);
-      // alert(111);
-      let obj={
-        token:GetRequest().token,
-        user_agent:GetRequest().user_agent
+      let obj = {
+        token: GetRequest().token,
+        user_agent: GetRequest().user_agent,
+        originUrl:GetRequest().originUrl
       }
       window.localStorage.setItem("header", JSON.stringify(obj));
     }

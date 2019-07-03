@@ -37,10 +37,26 @@ export default {
     }
   },
   methods: {
-    changeText() {
-      console.log(1);
+    changeText(e) {
       this.$emit("input", this.$el.innerHTML);
+      if(this.$el.innerHTML==''){
+        let newP=document.createElement("p");
+        let newB=document.createElement('br');
+        newP.appendChild(newB);
+        this.$refs.edit.appendChild(newP);
+      }
     },
+    // print(e){
+    //   let ev = e || window.event;
+    //   ev.preventDefault();
+    //   console.log(this.$el.innerHTML);
+    //   // let ev = e || window.event; //获取event对象 
+    //   if(this.$el.innerHTML==='<p><br></p>'&&ev.keyCode==8){
+    //       console.log('禁止删除')
+    //       ev.returnValue=false;
+    //       ev.preventDefault();
+    //   }
+    // },
     focusE() {
       // alert(2);
       window.scrollTo(0, 0);
@@ -58,7 +74,6 @@ export default {
     keepLastIndex(obj) {
       console.log(obj);
       console.log(window.getSelection);
-      console.log(document.selection);
       if (window.getSelection) {
         //ie11 10 9 ff safari
         obj.focus(); //解决ff不获取焦点无法定位问题
@@ -72,6 +87,7 @@ export default {
         range.moveToElementText(obj); //range定位到obj
         range.collapse(false); //光标移至最后
         range.select();
+        console.log(22);
       }
     }
   }
@@ -84,8 +100,9 @@ export default {
   height: 100% !important;
   overflow: auto !important;
   word-break: break-all !important;
-  font-size: 42px !important;
+  font-size: 52px !important;
   outline: none !important;
+  line-height: 1.5 !important;
   user-select: text !important;
   white-space: pre-wrap !important;
   // text-align: left;
@@ -108,12 +125,13 @@ export default {
   color: #000 !important;
 }
 .edit-div>p{
-  line-height: 2 !important;
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   letter-spacing: .5px !important;
 }
 .edit-div  span {
-  font-size: 42px !important;
-  line-height: 2 !important;
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   color: #000 !important;
 }
 .edit-div p img{
@@ -121,28 +139,28 @@ export default {
   margin: 0 auto !important;
 }
 .edit-div  h1 {
-  font-size: 42px !important;
-  line-height: 2 !important;
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   color: #000 !important;
 }
-.edit-div  h2 {
-  font-size: 42px !important;
-  line-height: 2 !important;
+.edit-div  h1.5{
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   color: #000 !important;
 }
 .edit-div  h3 {
-  font-size: 42px !important;
-  line-height: 2 !important;
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   color: #000 !important;
 }
 .edit-div  h4 {
-  font-size: 42px !important;
-  line-height: 2 !important;
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   color: #000 !important;
 }
 .edit-div  div {
-  font-size: 42px !important;
-  line-height: 2 !important;
+  font-size: 52px !important;
+  line-height: 1.5 !important;
   color: #000 !important;
 }
 </style>

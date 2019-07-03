@@ -1,9 +1,9 @@
 import axios from 'axios';
 import qs from 'qs';
 import JSONbig from 'json-bigint';
-
+let originUrl=window.location.origin;
 axios.defaults.timeout = 5000;
-axios.defaults.baseURL = 'http://www.imuguang.com/api/user';
+axios.defaults.baseURL = `${originUrl}/api/user`;
 // axios.defaults.baseURL = 'http://192.168.1.107:9090/user';
 axios.defaults.transformResponse=function (data) {
   // 对 data 进行任意转换处理
