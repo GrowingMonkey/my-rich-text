@@ -11,7 +11,7 @@
         </div>
         <div class="dove-cover">
           <img
-            :src="'http://file-t.imuguang.com/'+coverUrl+'?x-oss-process=image/resize,w_375,h_300,m_fill'"
+            :src="'http://file-t.imuguang.com/'+coverUrl+'?x-oss-process=image/resize,w_375,h_150,m_fill'"
             v-if="coverUrl"
             crossorigin="anonymous"
             :data-src="coverUrl"
@@ -83,7 +83,7 @@ export default {
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
-    this.originUrl =header && header.originUrl ? header.originUrl : window.location.origin;
+    this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
   },
   methods: {
     changeStyle() {
@@ -168,7 +168,7 @@ export default {
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
-                  that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw)";
+                  // that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw)";
                 }
                 Toast.clear();
               } else {
@@ -197,7 +197,7 @@ export default {
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
-                  that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw);";
+                  // that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw);";
                 }
                 Toast.clear();
               } else {
@@ -755,8 +755,9 @@ export default {
   position: relative;
   width: 1242px;
   /* height: 600px; */
-  min-height: 300px;
-  max-height: 800px;
+  height: 300px;
+  /* min-height: 300px;
+  max-height: 800px; */
   overflow: hidden;
   background: rgba(246, 247, 249, 1);
 }

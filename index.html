@@ -17,7 +17,7 @@
       if (data) {
         let headers = {};
         headers.token = data["token"];
-        alert(headers.token);
+        // alert(headers.token);
         headers.user_agent = JSON.parse(decodeURIComponent(data["user_agent"]));
         let headStr =
           '{"user_agent":"Version:' +
@@ -57,7 +57,7 @@
         user_agent: GetRequest().user_agent,
         originUrl:GetRequest().originUrl
       }
-      alert(obj.token);
+      // alert(obj.token);
       window.localStorage.setItem("header", JSON.stringify(obj));
     }
 

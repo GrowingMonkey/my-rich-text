@@ -1,7 +1,7 @@
 import axios from 'axios';
 import qs from 'qs';
 import JSONbig from 'json-bigint';
-let originUrl=window.location.origin;
+const originUrl=window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
 axios.defaults.timeout = 5000;
 axios.defaults.baseURL = `${originUrl}/api/user`;
 // axios.defaults.baseURL = 'http://192.168.1.107:9090/user';
