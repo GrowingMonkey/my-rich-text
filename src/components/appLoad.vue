@@ -31,19 +31,6 @@
       <span :class="{'active':!boolStyle2}">请输入正文</span>
       <v-edit-div v-model="text"></v-edit-div>
     </div>
-    <div style="clear:both"></div>
-    <div class="dove-footer">
-      <div class="btn-box">
-        <label class="up-btn">
-          <input
-            type="file"
-            accept="image/*"
-            @change="onFileChange"
-            name="imgContent"
-          >
-        </label>
-      </div>
-    </div>
   </div>
 </template>
 <script>
@@ -293,7 +280,7 @@ export default {
       this.positionImg = e.target.getAttribute("name");
       this.filesType = e.target.files[0].type;
       let file = e.target.files[0];
-      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
+      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)|GIF$/;
       if (!imgStr.test(file.name)) {
         alert("文件不是图片类型");
         return false;

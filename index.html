@@ -50,14 +50,19 @@
       }
       return theRequest;
     }
-    // alert(222);
+    alert(222);
     if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1) {
+      // let obj = {
+      //   token: GetRequest().token,
+      //   user_agent: GetRequest().user_agent,
+      //   originUrl:GetRequest().originUrl
+      // }
       let obj = {
-        token: GetRequest().token,
-        user_agent: GetRequest().user_agent,
+        token:'56866340513779712',
+        user_agent: 'mi',
         originUrl:GetRequest().originUrl
       }
-      // alert(obj.token);
+
       window.localStorage.setItem("header", JSON.stringify(obj));
     }
 
