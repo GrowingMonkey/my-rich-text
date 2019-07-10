@@ -3,12 +3,11 @@
     <div
       class="edit-div"
       :contenteditable="canEdit"
-      @focus="focusE"
       ref="edit"
       @click="point"
       @blur="blurE"
       @input="changeText"
-    ></div>
+    ><p><br/></p></div>
     <div style="clear:both"></div>
     <div class="dove-footer">
       <div class="btn-box">
@@ -48,7 +47,9 @@ export default {
       isLocked: false,
       lastpoint: 0,
       editorRange: null,
-      editorNode: null
+      editorNode: null,
+      selection:'',
+      range:'',
     };
   },
   watch: {
@@ -168,6 +169,19 @@ export default {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 that.execCommand('insertimage',`http://file-t.imuguang.com/${newFileName}`);
+                // let emojiText=document.createElement('IMG');
+                // emojiText.src=`http://file-t.imuguang.com/${newFileName}`;
+                // var range = document.createRange()
+					      // // 光标对象的范围界定为新建的表情节点
+					      // range.selectNodeContents(emojiText)
+					      // // 光标位置定位在表情节点的最大长度
+					      // range.setStart(emojiText, emojiText.length+1)
+					      // // 使光标开始和光标结束重叠
+					      // range.collapse(true)
+					      // // 清除选定对象的所有光标对象
+					      // that.selection.removeAllRanges();
+					      // // 插入新的光标对象
+					      // that.selection.addRange(range)
                 Toast.clear();
               } else {
                 // Toast("上传失败");
@@ -241,8 +255,22 @@ export default {
       return blob;
     },
     onFileChange(e) {
+      this.selection=window.getSelection();
+      if(this.selection&&this.selection.rangeCount<=0){
+        this.$refs.edit.focus();
+      }
+      //保存光标的位置
+      // let startNode=document.getElementsByClassName('edit-div')[0];
+      // let startOffset=window.getSelection().focusOffset;
+      // window.getSelection().getRangeAt(0).setStart(startNode,startOffset);
       let that = this;
       let file = e.target.files;
+      that.toast = Toast.loading({
+        duration: 0, // 持续展示 toast
+        forbidClick: true, // 禁用背景点击
+        loadingType: "spinner",
+        message: "上传中"
+      });
       that
         .getpublishId()
         .then(res => {
@@ -263,6 +291,11 @@ export default {
               let curfile = file[i];
               let filesType=curfile.type;
               reader.onload = e => {
+                let imgStr = /\.(jpg|jpeg|png|bmp|gif|BMP|JPG|PNG|JPEG|GIF)$/;
+                if (!imgStr.test(curfile.name)) {
+                  alert("文件不是图片类型");
+                  return false;
+                }
                  console.log(file.length);
                 let base64Img = e.target.result;
                 let arr = base64Img.split(",");
@@ -321,16 +354,15 @@ export default {
       // console.log(obj.value.length);
       if (window.getSelection) {
         //ie11 10 9 ff safari
-        obj.focus(); //解决ff不获取焦点无法定位问题
-        let range = window.getSelection(); //创建range
-        let offset = range.focusOffset;
-        console.log(offset);
-        range.selectAllChildren(obj); //range 选择obj下所有子内容
-        console.log(range);
+        // obj.focus(); //解决ff不获取焦点无法定位问题
+        let selection = window.getSelection(); //创建range
+        selection.selectAllChildren(obj); //range 选择obj下所有子内容
+        console.log(selection);
         // if(this.$refs.edit.innerHTML==''||this.$refs.edit.innerHTML=='<p><br/></p>'){
-        range.collapseToEnd();
+          //光标移到最后
+        // selection.collapseToEnd();
         // }else{
-        // range.Selection.removeRange();
+        // selection.removeAllRanges();
         // }
         //光标移至最后
       } else if (document.selection) {
@@ -377,6 +409,7 @@ export default {
 .edit-div img {
   width: 100% !important;
   text-align: center !important;
+  padding: 55px 0 !important;
 }
 .edit-div .img-box img {
   padding: 55px 0 !important;
@@ -402,7 +435,7 @@ export default {
   line-height: 1.5 !important;
   color: #000 !important;
 }
-.edit-div h1.5 {
+.edit-div h1 {
   font-size: 52px !important;
   line-height: 1.5 !important;
   color: #000 !important;

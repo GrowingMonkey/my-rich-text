@@ -280,7 +280,7 @@ export default {
       this.positionImg = e.target.getAttribute("name");
       this.filesType = e.target.files[0].type;
       let file = e.target.files[0];
-      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)|GIF$/;
+      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
       if (!imgStr.test(file.name)) {
         alert("文件不是图片类型");
         return false;
