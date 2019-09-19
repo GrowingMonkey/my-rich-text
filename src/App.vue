@@ -4,7 +4,8 @@
     <router-view/>-->
     <!-- <login-user v-if="!pro" v-bind:pro="pro" v-on:success="success"></login-user> -->
     <!-- <login-user v-bind:pro="pro" v-on:success="success"></login-user>  -->
-    <app-load></app-load>
+    <router-view/>
+    <!-- <app-load></app-load> -->
   </div>
 </template>
 

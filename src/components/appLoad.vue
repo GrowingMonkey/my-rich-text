@@ -5,13 +5,13 @@
         <div class="tab-load">
           <i @click="returnPage"></i>
           <span>编辑</span>
-          <button class="submit-load" @click.stop.prevent="submitForm" :disabled="isDisable">
+          <button class="submit-load" :disabled="isDisable" style="visibility:hidden">
             <p>发表</p>
           </button>
         </div>
         <div class="dove-cover">
           <img
-            :src="'http://file-t.imuguang.com/'+coverUrl+'?x-oss-process=image/resize,w_375,h_150,m_fill'"
+            :src="'http://file-t.imuguang.com/'+coverUrl+'?x-oss-process=image/resize,w_375,h_300,m_fill'"
             v-if="coverUrl"
             crossorigin="anonymous"
             :data-src="coverUrl"
@@ -23,20 +23,20 @@
         </div>
         <p class="dove-title" @click="changeStyle">
           <span :class="{'active':!boolStyle}">请输入标题</span>
-          <input type="text" ref="title" v-model="title" maxlength="20">
+          <input type="text" ref="title" v-model="title" maxlength="35">
         </p>
       </div>
     </div>
     <div class="dove-content" @click="changeStyle2" :style="{height:contentHeight}">
       <span :class="{'active':!boolStyle2}">请输入正文</span>
-      <v-edit-div v-model="text"></v-edit-div>
+      <v-edit-div v-model="text" :on-ok="submitForm" :isdisable="isDisable"></v-edit-div>
     </div>
   </div>
 </template>
 <script>
 import axios from "axios";
 // import OSS from 'ali-oss';
-import { Toast } from "vant";
+import { Toast,Dialog } from "vant";
 import vEditDiv from "./vEditDiv";
 import qs from "qs";
 export default {
@@ -60,7 +60,7 @@ export default {
       token: "",
       boolStyle: true,
       boolStyle2: true,
-      contentHeight:'calc(100vh - 15.29791vw - 24.15459vw)',
+      contentHeight:'calc(100vh - 15.29791vw - 64.41224vw)',
     };
   },
   components: {
@@ -70,9 +70,39 @@ export default {
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
+    if((!header.token)||header.token=='undefined'){
+       Dialog.alert({
+            message:'获取用户信息错误'
+            }).then(() => {
+              this.returnPage();
+      });
+
+    }
+    if(this.$route.query.caogao_id){
+      let draft_data=JSON.parse(window.localStorage.getItem('draft'));
+      this.coverUrl=draft_data.bgpUrl;
+      this.title=draft_data.title;
+      this.detail=draft_data.detail;
+      this.text=draft_data.content;
+    }
     this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
   },
   methods: {
+    GetRequest() {
+      let url = window.location.search ? window.location.search : window.location.hash; //获取url中"?"符后的字串 
+      if (url.indexOf('#') != -1) {
+        url = url.slice(2);
+      }
+      let theRequest = new Object();
+      if (url.indexOf("?") != -1) {
+        let str = url.substr(1);
+        let strs = str.split("&");
+        for (var i = 0; i < strs.length; i++) {
+          theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+        }
+      }
+      return theRequest;
+    },
     changeStyle() {
       this.boolStyle = false;
       this.$refs.title.focus();
@@ -307,8 +337,11 @@ export default {
         //获取发布id
         that.getpublishId().then(res => {
           if (res.code != 0) {
-            alert("服务端错误");
-            alert(res.message);
+            // alert("服务端错误");
+            Dialog.alert({
+            title: '服务端错误',
+            message:res.message
+            })
             Toast.clear();
             that.returnPage();
           }
@@ -402,8 +435,10 @@ export default {
             : currentFile;
         this.getpublishId().then(res => {
           if (res.code != 0) {
-            alert("服务端错误");
-            alert(res.message);
+            Dialog.alert({
+            title: '服务端错误',
+            message:res.message
+            })
             Toast.clear();
             that.returnPage();
           }
@@ -580,13 +615,23 @@ export default {
         range.select();
       }
     },
-    //定义app调用的方法
-    submitForm() {
+    // //定义app调用的方法
+    submitForm(val,type) {
+      this.isDisable=val;
+      let commit_url='/art/commit';
+      if(type==1){
+        commit_url='/art/commit';
+      }else{
+        commit_url='/art/draft/change'
+      }
       let that = this;
       that.isDisable = true;
       this.getpublishId().then(res => {
         if (res.code != 0) {
-          alert("服务端错误");
+          Dialog.alert({
+            title: '服务端错误',
+            message:res.message
+            })
           that.returnPage();
         } else {
           if (!that.title) {
@@ -606,23 +651,33 @@ export default {
             that.isDisable = false;
             return;
           }
+          Toast.loading({
+        duration: 100, // 持续展示 toast
+        forbidClick: true, // 禁用背景点击
+        loadingType: "spinner",
+        message: "发布中"
+      });
           let data = {
             bgpUrl:
               that.coverUrl && that.coverUrl !== ""
                 ? that.coverUrl
                 : `bg/${Math.floor(Math.random() * 5) + 1}.jpg`,
             title: that.title,
-            content: that.text.replace(/\n/g, "<br/>"),
+            content: that.text.replace('/<a>/g','<p>').replace('/<\/a>/g','</p>').replace(/\n/g, "<br/>"),
             detail: that.getDetail(that.text).substring(0, 100)
           };
+          if(this.$route.query.caogao_id&&type!=1){
+            data.id=this.$route.query.caogao_id;
+          }
           that
-            .$post(`${that.originUrl}/api/upload/art/commit`, data)
+            .$post(`${that.originUrl}/api/upload${commit_url}`, data)
             .then(Response => {
-              if (Response.code == 0) {
+              if (Response.code == 0&&type==1) {
                 window.localStorage.setItem("publishId", "");
                 that.times += 1;
                 that.returnPage();
               } else {
+                 window.localStorage.setItem("publishId", "");
                 Toast({ message: Response.message, duration: 1000 });
               }
               that.isDisable = false;
@@ -742,7 +797,7 @@ export default {
   position: relative;
   width: 1242px;
   /* height: 600px; */
-  height: 300px;
+  height: 600px;
   /* min-height: 300px;
   max-height: 800px; */
   overflow: hidden;
@@ -790,8 +845,10 @@ export default {
   margin: 0;
 }
 .dove-title {
-  width: 1242px;
+  width: 100vw;
   height: 190px;
+  padding-left: 70px;
+  padding-right: 10px;
   font-size: 52px;
   font-family: PingFangSC-Semibold;
   font-weight: 600;
@@ -803,19 +860,23 @@ export default {
   box-sizing: border-box;
 }
 .dove-title span {
-  padding-left: 70px;
+  /* height: 100%; */
+  line-height: 2.5;
   font-size: 73px;
   color: rgba(201, 201, 201, 1);
   position: absolute;
-  display: block;
+  top: 50%;
+   transform: translate(0, -50%);
+  /* display: block; */
 }
 .dove-title .active {
   display: none;
 }
 .dove-title input {
-  padding-left: 70px;
   border: none;
+  display: inline-block;
   margin: 0;
+  padding-left:1px !important;
   width: 100%;
   /* height: 73px; */
   font-size: 73px;
@@ -839,7 +900,7 @@ export default {
   /* height: 1580px; */
   padding: 42px 70px;
 
-  padding-bottom: 300px;
+  padding-bottom: 110px;
   box-sizing: border-box;
   outline: none;
 }
@@ -860,20 +921,29 @@ export default {
   height: 144px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding-left: 80px;
+  padding-right: 80px;
   background: rgba(255, 255, 255, 1);
   box-shadow: 0px -4px 64px -8px rgba(160, 160, 160, 0.5);
   box-sizing: border-box;
 }
 .dove-footer .btn-box {
   display: flex;
+  /* width:100%; */
+  height:100%;
   flex-direction: column;
   align-items: center;
+  justify-content:center;
+  background:none;
+  border:none;
   position: relative;
 }
 .dove-footer .btn-box .up-btn {
   cursor: pointer;
   margin-top: 9px;
+  background:none;
+  border:none;
   text-align: center;
   font-size: 28px;
   font-family: PingFang-SC-Medium;
@@ -885,10 +955,10 @@ export default {
   margin-left: 4px;
   content: " ";
   display: block;
-  width: 62px;
+  width: 68px;
   /* margin-top: 9px; */
-  height: 58px;
-  background: url("../../static/up_img.png") no-repeat;
+  height: 63px;
+  background: url("http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/wh/static/img/send_icon.png") no-repeat;
   background-size: 100%;
 }
 .dove-footer .btn-box input {

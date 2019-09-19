@@ -11,7 +11,7 @@ module.exports = {
               viewportHeight: 2188,
               unitPrecision: 5,
               viewportUnit: 'vw' ,
-              selectorBlackList: ['van-toast','van-toast--text','van-toast--middle','.ignore','.hairlines','.van-loading'],
+              selectorBlackList: ['van-toast','van-toast--text','van-toast--middle','.ignore','.hairlines','.van-loading','van-dialog','van-dialog__header','van-dialog__message','van-dialog__message--has-title','van-button--large','van-button'],
               minPixelValue: 1,
               mediaQuery: false
            }

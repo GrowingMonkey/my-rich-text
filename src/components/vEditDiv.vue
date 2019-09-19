@@ -1,6 +1,7 @@
 <template>
   <div style="width:100%;height:100%">
     <div
+      id="edit-div"
       class="edit-div"
       :contenteditable="canEdit"
       ref="edit"
@@ -10,6 +11,7 @@
     ><p><br/></p></div>
     <div style="clear:both"></div>
     <div class="dove-footer">
+      <div class="action-box">
       <div class="btn-box">
         <button class="up-btn" @click="uploadImg">
           <input
@@ -22,6 +24,16 @@
           />
         </button>
       </div>
+       <button @click.stop.prevent="saveCaogao">
+          <i class="save"></i>
+        </button>
+        <button>
+          <i class="caogao" @click.stop.prevent="jumpDraft"></i>
+        </button>
+      </div>
+      <button class="submit-load" @click.stop.prevent="_submitForm">
+            <p>发表</p>
+          </button>
     </div>
   </div>
 </template>
@@ -38,6 +50,12 @@ export default {
     canEdit: {
       type: Boolean,
       default: true
+    },
+    onOk: {    //定义onOK属性
+      type: Function
+    },
+    isdisable:{
+      type:Boolean
     }
   },
   data() {
@@ -60,12 +78,51 @@ export default {
     }
   },
   methods: {
+    jumpDraft(){
+      this.$router.push({path:'/draftbox'})
+    },
+    saveCaogao(){
+      console.log(111);
+      if(this.isdisable){
+        return;
+      }
+      if(this.onOk){
+        this.onOk(true,2);
+      }
+    },
+
+    _submitForm(){
+      if(this.isdisable){
+        return;
+      }
+      if(this.onOk){
+        this.onOk(true,1);
+      }
+    },
+
+    removeAEvent(){
+      this.$nextTick(()=>{
+         document.querySelector('.edit-div').addEventListener('click', e => {
+          // 阻止默认事件
+          e.preventDefault()
+          // 定义a标签跳转规则
+          if (e.target.nodeName === 'A') {
+            this.$fn.openWindow(e.target.href)
+          }
+        })
+      })
+    },
     point() {
       if (window.getSelection) {
         //ie11 10 9 ff safari
         this.$refs.edit.focus(); //解决ff不获取焦点无法定位问题
         // let range = window.getSelection(); //创建range
         // let offset=range.focusOffset;
+      }
+      if(navigator.userAgent.indexOf("Android") == -1&&navigator.userAgent.indexOf("Adr") == -1){
+        let  selection = getSelection();
+        this.range=selection.getRangeAt(0);
+        console.log(this.range);
       }
     },
     uuid() {
@@ -184,8 +241,10 @@ export default {
 					      // that.selection.addRange(range)
                 Toast.clear();
               } else {
+                // that.execCommand('insertimage',`http://file-t.imuguang.com/img/ddf5bf77h77h48efdf95f8e9fgbhh5ef.jpeg?x-oss-process=image/resize,w_375,h_300,m_fill`);
                 // Toast("上传失败");
                 // Toast({ message: '上传失败', duration: 1000 });
+                Toast.clear();
               }
             };
           }
@@ -257,7 +316,21 @@ export default {
     onFileChange(e) {
       this.selection=window.getSelection();
       if(this.selection&&this.selection.rangeCount<=0){
-        this.$refs.edit.focus();
+        // this.$refs.edit.focus();
+        if(navigator.userAgent.indexOf("Android") == -1&&navigator.userAgent.indexOf("Adr") == -1){
+           this.$refs.edit.focus();
+           let selection = window.getSelection();
+           console.log(selection);
+           if(this.range){
+             selection.removeAllRanges();
+             selection.addRange(this.range);
+           }
+        }else{
+          this.$refs.edit.focus();
+          this.$refs.edit.scrollTop = this.$refs.edit.scrollHeight;
+        }
+        // this.range.selectAllChildren(textDom);
+        // this.range.collapseToEnd()
       }
       //保存光标的位置
       // let startNode=document.getElementsByClassName('edit-div')[0];
@@ -326,6 +399,9 @@ export default {
       // }
     },
     changeText(e) {
+      // this.selection.selectAllChildren(this.$refs.edit);
+      
+      console.log(this.selection);
       this.$emit("input", this.$refs.edit.innerHTML);
       if (this.$refs.edit.innerHTML == "") {
         let newP = document.createElement("p");
@@ -333,20 +409,25 @@ export default {
         newP.appendChild(newB);
         this.$refs.edit.appendChild(newP);
       }
+       if(navigator.userAgent.indexOf("Android") == -1&&navigator.userAgent.indexOf("Adr") == -1){
+         this.range=window.getSelection().getRangeAt(0);
+         console.log(this.range);
+       }
     },
     execCommand(name, args = null) {
       document.execCommand(name, false, args);
     },
     focusE() {
       // alert(2);
-      window.scrollTo(0, 0);
-      this.isLocked = true;
-      console.log(this.$refs.edit);
-      this.keepLastIndex(this.$refs.edit);
-      this.$refs.edit.scrollTop = this.$refs.edit.scrollHeight;
+      // window.scrollTo(0, 0);
+      // this.isLocked = true;
+      // console.log(this.$refs.edit);
+      // this.keepLastIndex(this.$refs.edit);
+      // this.$refs.edit.scrollTop = this.$refs.edit.scrollHeight;
+      this.selection=window.getSelection();
+      console.log(this.selection.rangeCount);
     },
     blurE() {
-      // alert(3);
       window.scrollTo(0, 0);
       this.isLocked = false;
     },
@@ -355,7 +436,7 @@ export default {
       if (window.getSelection) {
         //ie11 10 9 ff safari
         // obj.focus(); //解决ff不获取焦点无法定位问题
-        let selection = window.getSelection(); //创建range
+        this.selection = window.getSelection(); //创建range
         selection.selectAllChildren(obj); //range 选择obj下所有子内容
         console.log(selection);
         // if(this.$refs.edit.innerHTML==''||this.$refs.edit.innerHTML=='<p><br/></p>'){
@@ -377,14 +458,38 @@ export default {
     }
   },
   mounted() {
+    this.innerText=this.value;
     this.originUrl =
       window.location.origin.indexOf("www") > -1
         ? "http://www.imuguang.com"
         : "http://test.imuguang.com";
+    this.$nextTick(()=>{
+        document.getElementById('edit-div').innerHTML=this.value;
+      })
   }
 };
 </script>
 <style lang="scss" rel="stylesheet/scss">
+.action-box{
+  display: flex;
+  align-items: center;
+}
+.save{
+  margin-left: 100px;
+  display: block;
+  width: 67px;
+  height: 67px;
+  background: url('http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/wh/static/img/save_icon.png') no-repeat;
+  background-size: 100%;
+}
+.caogao{
+  margin-left: 100px;
+  display: block;
+  width: 78px;
+  height: 72px;
+  background: url('http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/wh/static/img/caogao_icon.png') no-repeat;
+  background-size: 100%;
+}
 .edit-div {
   box-sizing: border-box !important;
   width: 100% !important;
@@ -407,7 +512,7 @@ export default {
   }
 }
 .edit-div img {
-  width: 100% !important;
+  width: 90% !important;
   text-align: center !important;
   padding: 55px 0 !important;
 }
