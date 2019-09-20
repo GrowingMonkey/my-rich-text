@@ -793,6 +793,7 @@ export default {
   line-height: 65px;
 }
 .submit-load p:before {
+  visibility: hidden;
   content: " ";
   display: inline-block;
   width: 40px;
