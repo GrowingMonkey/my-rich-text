@@ -554,6 +554,14 @@ export default {
     //     };
     //   });
     // },
+    removeHtmlStyle(html){
+      let reg= /style="[^=>]*"([(\s+\w+=)|>])/g;
+      let newHtml='';
+      if(html){
+        newHtml=html.replace(reg,'$1');
+      }
+      return newHtml;
+    },
     convertToBlob(base64Str, fileType) {
       var base64 = window.atob(base64Str);
       var len = base64.length;
@@ -663,7 +671,7 @@ export default {
                 ? that.coverUrl
                 : `bg/${Math.floor(Math.random() * 5) + 1}.jpg`,
             title: that.title,
-            content: that.text.replace('/<a>/g','<p>').replace('/<\/a>/g','</p>').replace(/\n/g, "<br/>"),
+            content: that.removeHtmlStyle(that.text.replace('/<a>/g','<p>').replace('/<\/a>/g','</p>').replace(/\n/g, "<br/>")),
             detail: that.getDetail(that.text).substring(0, 100)
           };
           if(this.$route.query.caogao_id&&type!=1){

@@ -24,10 +24,10 @@
           />
         </button>
       </div>
-       <button @click.stop.prevent="saveCaogao">
+       <button class="btn-draft" @click.stop.prevent="saveCaogao">
           <i class="save"></i>
         </button>
-        <button>
+        <button class="btn-draft" >
           <i class="caogao" @click.stop.prevent="jumpDraft"></i>
         </button>
       </div>
@@ -78,6 +78,14 @@ export default {
     }
   },
   methods: {
+    removeHtmlStyle(html){
+      let reg= /style="[^=>]*"([(\s+\w+=)|>])/g;
+      let newHtml='';
+      if(html){
+        newHtml=html.replace(reg,'$1');
+      }
+      return newHtml;
+  },
     jumpDraft(){
       this.$router.push({path:'/draftbox'})
     },
@@ -470,6 +478,10 @@ export default {
 };
 </script>
 <style lang="scss" rel="stylesheet/scss">
+.btn-draft{
+  border: none;
+  background: none;
+}
 .action-box{
   display: flex;
   align-items: center;
