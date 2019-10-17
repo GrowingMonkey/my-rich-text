@@ -11,7 +11,7 @@
         </div>
         <div class="dove-cover">
           <img
-            :src="'http://file-t.imuguang.com/'+coverUrl+'?x-oss-process=image/resize,w_375,h_300,m_fill'"
+            :src="cdnUrl+coverUrl+'?x-oss-process=image/resize,w_375,h_300,m_fill'"
             v-if="coverUrl"
             crossorigin="anonymous"
             :data-src="coverUrl"
@@ -43,6 +43,8 @@ export default {
   name: "appLoad",
   data() {
     return {
+      cdnUrl:'http://file-t.imuguang.com/',
+      // cdnUrl:'https://aiyu-out.oss-cn-hongkong.aliyuncs.com/',//艾鱼
       toast: "",
       btncount: 0,
       filesType: "",
@@ -51,6 +53,7 @@ export default {
       isDisable: false, //表单重复提交
       coverUrl: "",
       originUrl: "http://www.imuguang.com",
+      //originUrl: "http://www.aiyu2019.com",//艾鱼
       coverImg: "",
       title: "",
       positionImg: "",
@@ -66,18 +69,8 @@ export default {
   components: {
     vEditDiv
   },
-  // created(){
-  //    let that=this;
-  //   this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
-  //   !this.$route.query.caogao_id&&this.$fetch(that.originUrl + "/api/upload/art/draft/list").then(res => {  
-      
-  //           that.coverUrl=list[0].bgpUrl;
-  //            that.title=list[0].title;
-  //            that.detail=list[0].detail;
-  //            that.text=list[0].content;
-  //   });
-  // },
   mounted() {
+    
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
@@ -91,6 +84,7 @@ export default {
     }
     let that=this;
     this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
+    //this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
     if(this.$route.query.caogao_id){
       let draft_data=JSON.parse(window.localStorage.getItem('draft'));
       this.coverUrl=draft_data.bgpUrl;
@@ -120,6 +114,11 @@ export default {
     }
   },
   methods: {
+    clearMethod(){
+      this.title='';
+      this.coverUrl='';
+      this.text="<p><br></p>";
+    },
     GetRequest() {
       let url = window.location.search ? window.location.search : window.location.hash; //获取url中"?"符后的字串 
       if (url.indexOf('#') != -1) {
@@ -159,6 +158,7 @@ export default {
       let body = signatureObj;
       console.log(body);
       let host = "https://f-bd.imuguang.com";
+      // let host = "https://aiyu-out.oss-cn-hongkong.aliyuncs.com";//艾鱼
       let policyText = {
         expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
         conditions: [
@@ -208,12 +208,14 @@ export default {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            // req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
                   that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                  //that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
@@ -236,12 +238,14 @@ export default {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            // req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
                   that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                  // that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
   
                 } else {
                   that.firstUp = false;
@@ -300,6 +304,7 @@ export default {
       ) {
         if (this.times != 1) {
           window.location.href = "jsbridge://www.imuguang.com/timeClose";
+          //window.location.href = "jsbridge://www.aiyu2019.com/timeClose";//艾鱼
         }
         // alert(window.dove.closePage);
         else {
@@ -657,6 +662,10 @@ export default {
     },
     // //定义app调用的方法
     submitForm(val,type) {
+      if(type=='clear'){
+        this.clearMethod();
+        return;
+      }
       this.isDisable=val;
       let commit_url='/art/commit';
       if(type==1){
@@ -1009,6 +1018,7 @@ export default {
   /* margin-top: 9px; */
   height: 63px;
   background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png") no-repeat;
+  /* background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 艾鱼 */
   background-size: 100%;
 }
 .dove-footer .btn-box input {

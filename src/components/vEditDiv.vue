@@ -24,7 +24,7 @@
           />
         </button>
       </div>
-       <button class="btn-draft" @click.stop.prevent="saveCaogao">
+       <button class="btn-draft" @click.stop.prevent="clearCaogao">
           <i class="save"></i>
         </button>
         <button class="btn-draft" >
@@ -61,6 +61,7 @@ export default {
   data() {
     return {
       originUrl: "http://www.imuguang.com",
+       //originUrl: "http://www.aiyu2019.com/api",//艾鱼
       innerText: this.value,
       isLocked: false,
       lastpoint: 0,
@@ -98,7 +99,17 @@ export default {
         this.onOk(true,2);
       }
     },
-
+    clearCaogao(){
+      if(this.onOk){
+        this.onOk(true,'clear');
+        this.$nextTick(()=>{
+        document.getElementById('edit-div').innerHTML="<p><br></p>";
+        // this.value.length>10&&setInterval(function(){
+        //   // that.onOk(true,3);
+        // },5000)
+      })
+      }
+    },
     _submitForm(){
       if(this.isdisable){
         return;
@@ -180,6 +191,7 @@ export default {
       let body = signatureObj;
       console.log(body);
       let host = "https://f-bd.imuguang.com";
+      // let host = "https://aiyu-out.oss-cn-hongkong.aliyuncs.com";//艾鱼
       let policyText = {
         expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
         conditions: [
@@ -229,11 +241,13 @@ export default {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            // req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 that.execCommand('insertimage',`http://file-t.imuguang.com/${newFileName}`);
+                // that.execCommand('insertimage',`https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`);//艾鱼
                 // let emojiText=document.createElement('IMG');
                 // emojiText.src=`http://file-t.imuguang.com/${newFileName}`;
                 // var range = document.createRange()
@@ -266,12 +280,14 @@ export default {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            // req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
                   that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                // that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
@@ -473,6 +489,10 @@ export default {
       window.location.origin.indexOf("www") > -1
         ? "http://www.imuguang.com"
         : "http://test.imuguang.com";
+        //    this.originUrl =
+      // window.location.origin.indexOf("www") > -1
+      //   ? "http://www.aiyu2019.com/api"
+      //   : "http://www.aiyu2019.com/api";//艾鱼
     this.$nextTick(()=>{
         document.getElementById('edit-div').innerHTML=this.value;
         // this.value.length>10&&setInterval(function(){
@@ -497,6 +517,7 @@ export default {
   width: 67px;
   height: 67px;
   background: url('https://f-bd.imuguang.com/wh/static/img/save_icon.png') no-repeat;
+  // background: url('https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/save_icon.png') no-repeat;艾鱼
   background-size: 100%;
 }
 .caogao{
@@ -505,6 +526,7 @@ export default {
   width: 78px;
   height: 72px;
   background: url('https://f-bd.imuguang.com/wh/static/img/caogao_icon.png') no-repeat;
+  // background: url('https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/caogao_icon.png') no-repeat;//艾鱼
   background-size: 100%;
 }
 .edit-div {

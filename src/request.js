@@ -2,6 +2,7 @@ import axios from 'axios';
 import qs from 'qs';
 import JSONbig from 'json-bigint';
 const originUrl=window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
+//const originUrl=window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
 axios.defaults.timeout = 5000;
 axios.defaults.baseURL = `${originUrl}/api/user`;
 // axios.defaults.baseURL = 'http://192.168.1.107:9090/user';

@@ -36,6 +36,7 @@ export default {
   data() {
     return {
       originUrl: "http://www.imuguang.com/api",
+      //originUrl: "http://www.aiyu2019.com/api",//艾鱼
       draft_list: []
     };
   },
@@ -45,6 +46,10 @@ export default {
       window.location.origin.indexOf("www") > -1
         ? "http://www.imuguang.com/api"
         : "http://test.imuguang.com/api";
+      //    this.originUrl =
+      // window.location.origin.indexOf("www") > -1
+      //   ? "http://www.aiyu2019.com/api"
+      //   : "http://www.aiyu2019.com/api";//艾鱼
     // this.originUrl ="http://192.168.1.107:9090"
     this.$fetch(that.originUrl + "/upload/art/draft/list").then(res => {
       if (res && res.code == 0) {
