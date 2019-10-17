@@ -43,8 +43,8 @@ export default {
   name: "appLoad",
   data() {
     return {
-      cdnUrl:'http://file-t.imuguang.com/',
-      // cdnUrl:'https://aiyu-out.oss-cn-hongkong.aliyuncs.com/',//艾鱼
+      // cdnUrl:'http://file-t.imuguang.com/',
+      cdnUrl:'https://aiyu-out.oss-cn-hongkong.aliyuncs.com/',//艾鱼
       toast: "",
       btncount: 0,
       filesType: "",
@@ -52,8 +52,8 @@ export default {
       imageUrl: "",
       isDisable: false, //表单重复提交
       coverUrl: "",
-      originUrl: "http://www.imuguang.com",
-      //originUrl: "http://www.aiyu2019.com",//艾鱼
+      // originUrl: "http://www.imuguang.com",
+      originUrl: "http://www.aiyu2019.com",//艾鱼
       coverImg: "",
       title: "",
       positionImg: "",
@@ -83,8 +83,8 @@ export default {
 
     }
     let that=this;
-    this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
-    //this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
+    // this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
+    this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
     if(this.$route.query.caogao_id){
       let draft_data=JSON.parse(window.localStorage.getItem('draft'));
       this.coverUrl=draft_data.bgpUrl;
@@ -157,8 +157,8 @@ export default {
       let that = this;
       let body = signatureObj;
       console.log(body);
-      let host = "https://f-bd.imuguang.com";
-      // let host = "https://aiyu-out.oss-cn-hongkong.aliyuncs.com";//艾鱼
+      // let host = "https://f-bd.imuguang.com";
+      let host = "https://aiyu-out.oss-cn-hongkong.aliyuncs.com";//艾鱼
       let policyText = {
         expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
         conditions: [
@@ -207,15 +207,15 @@ export default {
             } else {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
-            req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
-            // req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
+            // req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
-                  that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
-                  //that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
+                  // that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                  that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
@@ -237,15 +237,15 @@ export default {
             } else {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
-            req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
-            // req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
+            // req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
+            req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
-                  that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
-                  // that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
+                  // that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
+                  that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
   
                 } else {
                   that.firstUp = false;
@@ -303,8 +303,8 @@ export default {
         navigator.userAgent.indexOf("Adr") > -1
       ) {
         if (this.times != 1) {
-          window.location.href = "jsbridge://www.imuguang.com/timeClose";
-          //window.location.href = "jsbridge://www.aiyu2019.com/timeClose";//艾鱼
+          // window.location.href = "jsbridge://www.imuguang.com/timeClose";
+          window.location.href = "jsbridge://www.aiyu2019.com/timeClose";//艾鱼
         }
         // alert(window.dove.closePage);
         else {
@@ -1017,8 +1017,8 @@ export default {
   width: 68px;
   /* margin-top: 9px; */
   height: 63px;
-  background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png") no-repeat;
-  /* background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 艾鱼 */
+  /* background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png") no-repeat; */
+  background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 
   background-size: 100%;
 }
 .dove-footer .btn-box input {
