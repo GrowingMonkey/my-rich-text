@@ -12,7 +12,6 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       // '/system':{
-      //   target:'http://www.imuguang.com/api',
       //   changeOrigin:true,
       //   pathRewrite:{
       //     '^/system':'/system'

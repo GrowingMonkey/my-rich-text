@@ -85,7 +85,7 @@ export default {
         newHtml=html.replace(reg,'$1');
       }
       return newHtml;
-  },
+    },
     jumpDraft(){
       this.$router.push({path:'/draftbox'})
     },
@@ -179,7 +179,7 @@ export default {
       let that = this;
       let body = signatureObj;
       console.log(body);
-      let host = "http://imuguang-file.oss-cn-shenzhen.aliyuncs.com";
+      let host = "https://f-bd.imuguang.com";
       let policyText = {
         expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
         conditions: [
@@ -421,6 +421,7 @@ export default {
          this.range=window.getSelection().getRangeAt(0);
          console.log(this.range);
        }
+       this.onOk(true,3);
     },
     execCommand(name, args = null) {
       document.execCommand(name, false, args);
@@ -467,12 +468,16 @@ export default {
   },
   mounted() {
     this.innerText=this.value;
+    let that=this;
     this.originUrl =
       window.location.origin.indexOf("www") > -1
         ? "http://www.imuguang.com"
         : "http://test.imuguang.com";
     this.$nextTick(()=>{
         document.getElementById('edit-div').innerHTML=this.value;
+        // this.value.length>10&&setInterval(function(){
+        //   // that.onOk(true,3);
+        // },5000)
       })
   }
 };
@@ -491,7 +496,7 @@ export default {
   display: block;
   width: 67px;
   height: 67px;
-  background: url('http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/wh/static/img/save_icon.png') no-repeat;
+  background: url('https://f-bd.imuguang.com/wh/static/img/save_icon.png') no-repeat;
   background-size: 100%;
 }
 .caogao{
@@ -499,7 +504,7 @@ export default {
   display: block;
   width: 78px;
   height: 72px;
-  background: url('http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/wh/static/img/caogao_icon.png') no-repeat;
+  background: url('https://f-bd.imuguang.com/wh/static/img/caogao_icon.png') no-repeat;
   background-size: 100%;
 }
 .edit-div {

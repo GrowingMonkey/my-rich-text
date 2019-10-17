@@ -71,12 +71,6 @@ export default {
         phone: this.phonenumber,
         registerAgent: "h5"
       };
-      this.$post(
-        "http://www.imuguang.com/api/user/system/getPhoneCode",
-        data
-      ).then(Response => {
-        console.log(Response);
-      });
     }
   },
   mounted() {

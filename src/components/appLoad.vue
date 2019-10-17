@@ -66,6 +66,17 @@ export default {
   components: {
     vEditDiv
   },
+  // created(){
+  //    let that=this;
+  //   this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
+  //   !this.$route.query.caogao_id&&this.$fetch(that.originUrl + "/api/upload/art/draft/list").then(res => {  
+      
+  //           that.coverUrl=list[0].bgpUrl;
+  //            that.title=list[0].title;
+  //            that.detail=list[0].detail;
+  //            that.text=list[0].content;
+  //   });
+  // },
   mounted() {
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
@@ -78,14 +89,35 @@ export default {
       });
 
     }
+    let that=this;
+    this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
     if(this.$route.query.caogao_id){
       let draft_data=JSON.parse(window.localStorage.getItem('draft'));
       this.coverUrl=draft_data.bgpUrl;
       this.title=draft_data.title;
       this.detail=draft_data.detail;
       this.text=draft_data.content;
+    }else{
+      //自动获取最新草稿数据
+      this.$fetch(that.originUrl + "/api/upload/art/draft/list").then(res => {
+        if (res && res.code == 0) {
+          let list= res.data.list||[];
+          if(list.length!=0){
+             that.coverUrl=list[0].bgpUrl;
+             that.title=list[0].title;
+             that.detail=list[0].detail;
+             that.text=list[0].content;
+             window.localStorage.setItem("draft_id",list[0].id);
+             this.$nextTick(()=>{
+                document.getElementById('edit-div').innerHTML=list[0].content;
+                // this.value.length>10&&setInterval(function(){
+                //   // that.onOk(true,3);
+                // },5000)
+            })
+          }
+        } 
+      });
     }
-    this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
   },
   methods: {
     GetRequest() {
@@ -126,7 +158,7 @@ export default {
       let that = this;
       let body = signatureObj;
       console.log(body);
-      let host = "http://imuguang-file.oss-cn-shenzhen.aliyuncs.com";
+      let host = "https://f-bd.imuguang.com";
       let policyText = {
         expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
         conditions: [
@@ -642,7 +674,7 @@ export default {
             })
           that.returnPage();
         } else {
-          if (!that.title) {
+          if (type==1&&!that.title) {
             Toast({ message: "请输入标题", duration: 1000 });
             that.isDisable = false;
             return;
@@ -659,7 +691,7 @@ export default {
             that.isDisable = false;
             return;
           }
-          Toast.loading({
+          type!=3&&Toast.loading({
         duration: 100, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
         loadingType: "spinner",
@@ -677,14 +709,21 @@ export default {
           if(this.$route.query.caogao_id&&type!=1){
             data.id=this.$route.query.caogao_id;
           }
+          if(window.localStorage.getItem('draft_id')&&type==3){
+            data.id=window.localStorage.getItem('draft_id');
+          }
           that
             .$post(`${that.originUrl}/api/upload${commit_url}`, data)
             .then(Response => {
               if (Response.code == 0&&type==1) {
                 window.localStorage.setItem("publishId", "");
+                window.localStorage.removeItem("draft_id");
                 that.times += 1;
                 that.returnPage();
-              } else {
+              } else if(Response.code == 0&&type==3){
+                 window.localStorage.setItem("publishId", "");
+                 window.localStorage.setItem("draft_id",Response.data.id);
+              }else{
                  window.localStorage.setItem("publishId", "");
                 Toast({ message: Response.message, duration: 1000 });
               }
@@ -816,7 +855,7 @@ export default {
   /* top: 90%;
   right: 10%; */
   background: rgba(0, 0, 0, 0.5);
-
+  width:200px;
   font-size: 40px;
   top: 80%;
   left: 80%;
@@ -835,10 +874,12 @@ export default {
 }
 .cover-btn {
   position: absolute;
+  width: 100vw;
+  text-align: center;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 10px;
+  padding: 180px;
   color: rgba(201, 201, 201, 1);
   cursor: pointer;
 }
@@ -967,7 +1008,7 @@ export default {
   width: 68px;
   /* margin-top: 9px; */
   height: 63px;
-  background: url("http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/wh/static/img/send_icon.png") no-repeat;
+  background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png") no-repeat;
   background-size: 100%;
 }
 .dove-footer .btn-box input {

@@ -2,7 +2,7 @@
 accessid= 'STS.NJuj9942pLe6WhHqNW6k9ZPoy';
 accesskey= 'Ce8jve7EJsB9MPcsa6P1uvGLCky2LF8haV4fjnKH9rzo';
 token = 'CAISiwJ1q6Ft5B2yfSjIr4nAIYON2e1R+6fdVU75lU4COuQVtZXEmzz2IHhMenNgAugbtP83nWhY7/8alrh+W4NIX0rNaY5t9ZlN9wqkbtJxU1AWK/lW5qe+EE2/VjTZvqaLEcibIfrZfvCyESOm8gZ43br9cxi7QlWhKufnoJV7b9MRLGLaBHg8c7UwHAZ5r9IAPnb8LOukNgWQ4lDdF011oAFx+wgdgOadupTDtUGF0QKnk7ZE/9qufsieApMybMslYbCcx/drc6fN6ilU5iVR+b1+5K4+om+f4IvNWAEMuU7earKEq4Q3NnxwYqkrBqhDt+Pgkv51vOPekYntwgpKJ/tSVynPkENybBw344gagAFa4QBI64HwHDZJVtyBel1/r+rJzL4XIgimjm1ZFm3yKsM6s2AL+kChpf1onoxBMw6o8ijvMnfgktot34veVtrdbK54whem2C4SpB8Xs/Dz/u8JHzv8eMtQvAPdpUfp4XGvGa56nt1Ebt356DlYTfsOkq3jSA9SPJlvHGGSs3RXPA==';
-host = 'http://imuguang-file.oss-cn-shenzhen.aliyuncs.com';
+host = 'https://f-bd.imuguang.com';
 // host = 'http://post-test.oss-cn-shenzhen.aliyuncs.com';
 g_dirname = '';
 g_object_name = '';

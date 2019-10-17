@@ -9,6 +9,7 @@
         </button>
       </div>
     </div>
+    <div class="scroll-container">
     <ul class="draft_container">
       <li v-for="(v,k) in draft_list" :key="k" @click="jumpEditor(v)">
           <div class="draft_title">
@@ -26,6 +27,7 @@
           </div>
       </li>
     </ul>
+    </div>
   </div>
 </template>
 <script>
@@ -55,6 +57,7 @@ export default {
   methods: {
     jumpEditor(val) {
       window.localStorage.setItem("draft", JSON.stringify(val));
+      window.localStorage.setItem("draft_id",val.id);
       this.$router.push({
         path: "/appload",
         query: {
@@ -181,6 +184,10 @@ export default {
   font-weight: 600;
   color: rgba(58, 135, 230, 1);
   line-height: 65px;
+}
+.scroll-container{
+  height: calc(100vh - 70px - 58px);
+  overflow-y: scroll;
 }
 .submit-load p:before {
   content: " ";

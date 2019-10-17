@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="./static/reset.css">
-  <!-- <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script> -->
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <!-- <script src='http://gosspublic.alicdn.com/aliyun-oss-sdk-4.4.4.min.js'></script> -->
   <title>upapp</title>
   <script>
@@ -60,7 +60,7 @@
       }
       window.localStorage.setItem("header", JSON.stringify(obj));
     }
-    // window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}')
+    window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}')
   </script>
 </head>
 
@@ -71,5 +71,22 @@
 <script src="./static/lib/crypto1/hmac/hmac.js"></script>
 <script src="./static/lib/crypto1/sha1/sha1.js"></script>
 <script src="./static/lib/base64.js"></script>
+<script>
 
+var wHeight = window.innerHeight;   //获取初始可视窗口高度
+window.addEventListener('resize', function(){       //监测窗口大小的变化事件
+  // alert(111);
+    var hh = window.innerHeight;     //当前可视窗口高度
+    let viewTop = $("#edit-div").scrollTop();   //可视窗口高度顶部距离网页顶部的距离
+    if(wHeight > hh){           //可以作为虚拟键盘弹出事件
+        $("#edit-div").animate({scrollTop:viewTop}); 
+        // document.getElementsByTagName("body")[0].style.marginTop='-100px';
+           //调整可视页面的位置 
+    }else{         //可以作为虚拟键盘关闭事件
+        $("edit-div").animate({scrollTop:viewTop});
+        // document.getElementsByTagName("body")[0].style.marginTop='';
+    }
+    // wHeight = hh;
+});
+</script>
 </html>
