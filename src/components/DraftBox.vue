@@ -16,7 +16,7 @@
               {{v.title}}
           </div>
           <div class="draft_time">
-              {{v.createDate?v.createDate:'08-19 04:45'}}
+              {{v.createTime?v.createTime:nowDate}}
           </div>
           <div class="draft_detail">
               {{v.detail?v.detail:'暂无介绍'}}
@@ -35,12 +35,15 @@ export default {
   name: "DraftBox",
   data() {
     return {
+      nowDate:'',
       originUrl: "http://www.imuguang.com/api",
       //originUrl: "http://www.aiyu2019.com/api",//艾鱼
       draft_list: []
     };
   },
   mounted() {
+    let now_date=new Date();
+    this.nowDate=now_date.getFullYear() + '-' + (now_date.getMonth() + 1) + '-' + now_date.getDate();
     let that = this;
     this.originUrl =
       window.location.origin.indexOf("www") > -1
@@ -117,7 +120,7 @@ export default {
 }
 .draft_time{
     margin-top: 8px;
-    width:280px;
+    width:560px;
     height:67px;
     font-size:48px;
     color:rgba(175,175,175,1);
