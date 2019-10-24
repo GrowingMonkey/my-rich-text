@@ -61,7 +61,7 @@ export default {
   data() {
     return {
       // originUrl: "http://www.imuguang.com",
-       originUrl: "http://www.aiyu2019.com/api",//艾鱼
+       originUrl: "http://www.aiyu2019.com",//艾鱼
       innerText: this.value,
       isLocked: false,
       lastpoint: 0,
@@ -157,7 +157,7 @@ export default {
       uuid = uuid.replace(/[-]/g, "");
       return uuid;
     },
-    getpublishId() {
+    getpublishId(){
       let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
@@ -368,17 +368,14 @@ export default {
         loadingType: "spinner",
         message: "上传中"
       });
-      that
-        .getpublishId()
-        .then(res => {
+      that.getpublishId().then(res => {
           console.log(res);
           if (res && res.code != 0) {
             return { code: -2, message: "服务端错误" };
           } else {
             return that.getOssKey();
           }
-        })
-        .then(ress => {
+        }).then(ress => {
           console.log(ress);
           if (ress && ress.code == 0) {
             let store = JSON.parse(ress.data);
@@ -403,24 +400,6 @@ export default {
             }
           }
         });
-      // for (let i = 0; i < file.length; i++) {
-      //   let reader = new FileReader();
-      //   let curfile = e.target.files[i];
-      //   reader.onload = e => {
-      //     let base64Img = e.target.result;
-      //     let arr = base64Img.split(",");
-      //     let currentFile = arr[1];
-      //     this.imageUrl = e.target.result;
-      //     //图片转blob
-      //     let blobFile =
-      //       typeof currentFile === "string"
-      //         ? that.convertToBlob(currentFile, that.filesType)
-      //         : currentFile;
-      //     that.execCommand("insertImage", base64Img);
-      //     document.querySelector(".up-btn input").value = ""; // 解决同一张图片上传无效的问题
-      //   };
-      //   reader.readAsDataURL(curfile);
-      // }
     },
     changeText(e) {
       // this.selection.selectAllChildren(this.$refs.edit);
@@ -491,8 +470,8 @@ export default {
     //     : "http://test.imuguang.com";
            this.originUrl =
       window.location.origin.indexOf("www") > -1
-        ? "http://www.aiyu2019.com/api"
-        : "http://www.aiyu2019.com/api";//艾鱼
+        ? "http://www.aiyu2019.com"
+        : "http://www.aiyu2019.com";//艾鱼
     this.$nextTick(()=>{
         document.getElementById('edit-div').innerHTML=this.value;
         // this.value.length>10&&setInterval(function(){

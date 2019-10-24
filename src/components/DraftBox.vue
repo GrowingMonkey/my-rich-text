@@ -16,7 +16,7 @@
               {{v.title}}
           </div>
           <div class="draft_time">
-              {{v.createDate?v.createDate:'08-19 04:45'}}
+              {{v.createTime?v.createTime:'2019-01-01 00:01'}}
           </div>
           <div class="draft_detail">
               {{v.detail?v.detail:'暂无介绍'}}
@@ -117,7 +117,7 @@ export default {
 }
 .draft_time{
     margin-top: 8px;
-    width:280px;
+    width:560px;
     height:67px;
     font-size:48px;
     color:rgba(175,175,175,1);
