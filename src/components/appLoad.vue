@@ -64,6 +64,7 @@ export default {
       boolStyle: true,
       boolStyle2: true,
       contentHeight:'calc(100vh - 15.29791vw - 64.41224vw)',
+      draftId:''
     };
   },
   components: {
@@ -670,6 +671,7 @@ export default {
       let commit_url='/art/commit';
       if(type==1){
         commit_url='/art/commit';
+
       }else{
         commit_url='/art/draft/change'
       }
@@ -724,12 +726,21 @@ export default {
           that
             .$post(`${that.originUrl}/api/upload${commit_url}`, data)
             .then(Response => {
-              if (Response.code == 0&&type==1) {
+              if (Response.code == 0&&type==1) {//1为发布
                 window.localStorage.setItem("publishId", "");
                 window.localStorage.removeItem("draft_id");
+                  //删除草稿
+                  let data={ids:that.draftId};
+                  this.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
+                    console.log(res);
+                    if(res&&res.code==0){
+                        //关闭页面
+                         that.returnPage();
+                    }
+                  })
                 that.times += 1;
-                that.returnPage();
-              } else if(Response.code == 0&&type==3){
+              } else if(Response.code == 0&&type==3){//3为保存草稿
+                that.draftId=Response.data.id;
                  window.localStorage.setItem("publishId", "");
                  window.localStorage.setItem("draft_id",Response.data.id);
               }else{

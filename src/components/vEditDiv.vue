@@ -437,6 +437,7 @@ export default {
          this.range=window.getSelection().getRangeAt(0);
          console.log(this.range);
        }
+       //保存草稿
        this.onOk(true,3);
     },
     execCommand(name, args = null) {
