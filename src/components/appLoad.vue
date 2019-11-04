@@ -64,6 +64,7 @@ export default {
       boolStyle: true,
       boolStyle2: true,
       contentHeight:'calc(100vh - 15.29791vw - 64.41224vw)',
+      draftId:''
     };
   },
   components: {
@@ -87,10 +88,11 @@ export default {
     this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
     if(this.$route.query.caogao_id){
       let draft_data=JSON.parse(window.localStorage.getItem('draft'));
-      this.coverUrl=draft_data.bgpUrl;
-      this.title=draft_data.title;
-      this.detail=draft_data.detail;
-      this.text=draft_data.content;
+      this.coverUrl=draft_data.bgpUrl||'';
+      this.title=draft_data.title||'';
+      this.detail=draft_data.detail||'';
+      this.text=draft_data.content||'';
+      that.draftId=list[0].id;
     }else{
       //自动获取最新草稿数据
       this.$fetch(that.originUrl + "/api/upload/art/draft/list").then(res => {
@@ -101,6 +103,7 @@ export default {
              that.title=list[0].title;
              that.detail=list[0].detail;
              that.text=list[0].content;
+             that.draftId=list[0].id;
              window.localStorage.setItem("draft_id",list[0].id);
              this.$nextTick(()=>{
                 document.getElementById('edit-div').innerHTML=list[0].content;
@@ -108,6 +111,8 @@ export default {
                 //   // that.onOk(true,3);
                 // },5000)
             })
+          }else{
+            that.submitForm(true,3);
           }
         } 
       });
@@ -695,7 +700,7 @@ export default {
           }
           let detail = that.getDetail(that.text).substring(0, 100);
           console.log(detail);
-          if (detail.replace(/\s/g, "") == "") {
+          if (type==1&&detail.replace(/\s/g, "") == "") {
             Toast({ message: "请输入文字", duration: 1000 });
             that.isDisable = false;
             return;
@@ -719,7 +724,7 @@ export default {
             data.id=this.$route.query.caogao_id;
           }
           if(window.localStorage.getItem('draft_id')&&type==3){
-            data.id=window.localStorage.getItem('draft_id');
+            data.id=that.draftId||window.localStorage.getItem('draft_id');
           }
           that
             .$post(`${that.originUrl}/api/upload${commit_url}`, data)
@@ -727,9 +732,18 @@ export default {
               if (Response.code == 0&&type==1) {
                 window.localStorage.setItem("publishId", "");
                 window.localStorage.removeItem("draft_id");
+                //清除草稿
+                 let data={ids:that.draftId};
+                that.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
+                console.log(res);
+                if(res&&res.code==0){
+                  that.returnPage();
+                }
+              })
                 that.times += 1;
-                that.returnPage();
+                // that.returnPage();
               } else if(Response.code == 0&&type==3){
+                that.draftId=Response.data.id
                  window.localStorage.setItem("publishId", "");
                  window.localStorage.setItem("draft_id",Response.data.id);
               }else{
