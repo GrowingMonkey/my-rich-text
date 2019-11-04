@@ -92,6 +92,7 @@ export default {
       this.title=draft_data.title||'';
       this.detail=draft_data.detail||'';
       this.text=draft_data.content||'';
+      this.draftId=draft_data.id;
     }else{
       //自动获取最新草稿数据
       this.$fetch(that.originUrl + "/api/upload/art/draft/list").then(res => {
@@ -102,6 +103,7 @@ export default {
              that.title=list[0].title;
              that.detail=list[0].detail;
              that.text=list[0].content;
+             that.draftId=list[0].id;
              window.localStorage.setItem("draft_id",list[0].id);
              this.$nextTick(()=>{
                 document.getElementById('edit-div').innerHTML=list[0].content;
@@ -729,18 +731,19 @@ export default {
             .$post(`${that.originUrl}/api/upload${commit_url}`, data)
             .then(Response => {
               if (Response.code == 0&&type==1) {//1为发布
-                window.localStorage.setItem("publishId", "");
-                window.localStorage.removeItem("draft_id");
                   //删除草稿
+                  console.log(that.draftId);
                   let data={ids:that.draftId};
-                  this.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
-                    console.log(res);
+                  that.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
                     if(res&&res.code==0){
                         //关闭页面
+                        window.localStorage.setItem("publishId", "");
+                        window.localStorage.removeItem("draft_id");
                          that.returnPage();
                     }
                   })
                 that.times += 1;
+                // that.returnPage();
               } else if(Response.code == 0&&type==3){//3为保存草稿
                 that.draftId=Response.data.id;
                  window.localStorage.setItem("publishId", "");
