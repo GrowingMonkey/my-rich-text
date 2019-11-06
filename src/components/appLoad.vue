@@ -64,14 +64,16 @@ export default {
       boolStyle: true,
       boolStyle2: true,
       contentHeight:'calc(100vh - 15.29791vw - 64.41224vw)',
-      draftId:''
+      draftId:'',
+      //v4
+      clientOss:{}
     };
   },
   components: {
     vEditDiv
   },
   mounted() {
-    
+    let that=this;
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
@@ -117,8 +119,29 @@ export default {
         } 
       });
     }
+    this.getSTStoken().then(res=>{
+      let store = JSON.parse(res.data);
+      that.clientOss=new OSS.Wrapper({
+        accessKeyId: store.accessKeyId,
+        accessKeySecret: store.accessKeySecret,
+        stsToken: store.securityToken,
+        endpoint: "http://oss-cn-shenzhen.aliyuncs.com",
+        bucket: "imuguang-file"
+      })
+    });
   },
   methods: {
+
+    async getSTStoken() {
+      let that=this;
+      return await this.$post(`${that.originUrl}/api/upload/pic/getSTSToken`).then((res)=>{
+        if(res&&res.code!=0){
+          Toast(res.message);
+        }else{
+          return res;
+        }
+      });
+    },
     clearMethod(){
       this.title='';
       this.coverUrl='';
