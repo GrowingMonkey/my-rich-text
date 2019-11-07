@@ -699,7 +699,7 @@ export default {
             Toast({ message: "请输入内容", duration: 1000 });
             return;
           }
-          let detail = that.getDetail(that.text).substring(0, 100);
+          let detail = that.getDetail(that.text,type).substring(0, 100);
           console.log(detail);
           if (type==1&&detail.replace(/\s/g, "") == "") {
             Toast({ message: "请输入文字", duration: 1000 });
@@ -719,7 +719,7 @@ export default {
                 : `bg/${Math.floor(Math.random() * 5) + 1}.jpg`,
             title: that.title,
             content: that.removeHtmlStyle(that.text.replace('/<a>/g','<p>').replace('/<\/a>/g','</p>').replace(/\n/g, "<br/>")),
-            detail: that.getDetail(that.text).substring(0, 100)
+            detail: that.getDetail(that.text,type).substring(0, 100)
           };
           if(this.$route.query.caogao_id&&type!=1){
             data.id=this.$route.query.caogao_id;
@@ -760,7 +760,7 @@ export default {
     getDetail(html) {
       let re = new RegExp("<[^<>]+>", "g");
       let text = html.replace(re, "");
-      if (text == "") {
+      if (type==1&&text == "") {
         Toast({ message: "请输入文字", duration: 1000 });
       }
       //或
