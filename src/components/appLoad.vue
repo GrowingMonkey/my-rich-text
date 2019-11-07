@@ -18,7 +18,7 @@
           >
           <label class="cover-btn button is-danger" :class="{'active':!firstUp}">
             选择封面
-            <input type="file" @change="onFileChange" accept="image/*" name="cover">
+            <input type="file" @change="onFileChange2" accept="image/*" name="cover">
           </label>
         </div>
         <p class="dove-title" @click="changeStyle">
@@ -35,10 +35,12 @@
 </template>
 <script>
 import axios from "axios";
-// import OSS from 'ali-oss';
+import OSS from 'ali-oss';
 import { Toast,Dialog } from "vant";
 import vEditDiv from "./vEditDiv";
 import qs from "qs";
+import  configuration from '../utils/utils';
+const {VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
 export default {
   name: "appLoad",
   data() {
@@ -73,7 +75,7 @@ export default {
     vEditDiv
   },
   mounted() {
-    let that=this;
+    console.log(VUE_APP_VIDEO);
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
@@ -121,7 +123,7 @@ export default {
     }
     this.getSTStoken().then(res=>{
       let store = JSON.parse(res.data);
-      that.clientOss=new OSS.Wrapper({
+      that.clientOss=new OSS({
         accessKeyId: store.accessKeyId,
         accessKeySecret: store.accessKeySecret,
         stsToken: store.securityToken,
@@ -131,7 +133,7 @@ export default {
     });
   },
   methods: {
-
+    //获取阿里云签名数据
     async getSTStoken() {
       let that=this;
       return await this.$post(`${that.originUrl}/api/upload/pic/getSTSToken`).then((res)=>{
@@ -207,7 +209,7 @@ export default {
       let signature = Crypto.util.bytesToBase64(bytes);
       let newFileName = `img/${that.uuid()}${fileType}`;
       //组装发送数据
-      let request = new FormData();
+      let request = new FormData();  
       request.append("name", `${file.name}`);
       request.append("key", newFileName);
       request.append("OSSAccessKeyId", accessid); //Bucket 拥有者的Access Key Id。
@@ -466,6 +468,83 @@ export default {
             });
         });
       };
+    },
+    //封面上传
+    onFileChange2(e){
+      let that=this;
+      this.positionImg = e.target.getAttribute("name");
+      let file = e.target.files[0];
+      let picType = file.type.split("/")[1];
+      let url = URL.createObjectURL(file);
+      //限制文件上传为图片
+      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
+      if (!imgStr.test(file.name)) {
+        alert("文件不是图片类型");
+        return false;
+      }
+      //截取文件后缀名
+      let temporary = file.name.lastIndexOf(".");
+      let fileNameLength = file.name.length;
+      let fileFormat = file.name.substring(temporary + 1, fileNameLength);//png
+      that.multipartUploadWithSts(`${VUE_APP_DIR_IMG}${that.uuid()}.${fileFormat}`, file);
+    },
+    multitest(ossClient, storeAs, file, cpt) {
+      let that = this;
+      //console.log(file.name + ' => ' + storeAs);
+      var checkpoint_temp;
+      if (cpt) {
+        ossClient
+          .multipartUpload(storeAs, file, {
+            parallel: 2,
+            checkpoint: cpt,
+            progress: function*(percent, cpt) {
+              console.log("Progress: " + percent);
+              checkpoint_temp = cpt;
+            }
+          })
+          .then(function(result) {
+            console.log(result);
+            if(result){
+               if (that.positionImg == "cover") {
+                 that.firstUp = false;
+                that.coverUrl = result.name;
+               }
+              console.log(result.name);
+              // that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
+            }
+          })
+          .catch(function(err) {
+            console.log(err);
+            // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
+          });
+      } else {
+        console.log("multitest without cpt");
+        ossClient
+          .multipartUpload(storeAs, file, {
+            parallel: 2,
+            progress: function*(percent, cpt) {
+              console.log("Progress: " + percent);
+              // that.showProgress = true;
+              that.progress = Math.floor(percent * 100);
+              checkpoint_temp = cpt;
+            }
+          })
+          .then(function(result) {
+           if(that.positionImg == "cover") {
+                 that.firstUp = false;
+                that.coverUrl = result.name;
+            }
+            //  that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
+          })
+          .catch(function(err) {
+            console.log(err);
+            // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
+          });
+      }
+    },
+    multipartUploadWithSts(storeAs, file, cpt) {
+      let that = this;
+      that.multitest(that.clientOss, storeAs, file, cpt);
     },
     //base64转blob
     dataURItoBlob(base64Data) {

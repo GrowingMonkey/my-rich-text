@@ -17,9 +17,21 @@
           <input
             type="file"
             accept="image/*"
-            @change="onFileChange"
+            @change="onFileChange2"
             name="imgContent"
             ref="uploadinput"
+            multiple
+          />
+        </button>
+      </div>
+      <div class="btn-box save">
+        <button class="up-btn" @click="uploadVideo">
+          <input
+            type="file"
+            accept="*"
+            @change="onFileChange"
+            name="videoContent"
+            ref="uploadinputVideo"
             multiple
           />
         </button>
@@ -39,6 +51,10 @@
 </template>
 <script type="text/ecmascript-6">
 import axios from "axios";
+import OSS from 'ali-oss';
+import  configuration from '../utils/utils';
+const {VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
+
 import { Toast } from "vant";
 export default {
   name: "editDiv",
@@ -69,6 +85,7 @@ export default {
       editorNode: null,
       selection:'',
       range:'',
+      clientOss:{}
     };
   },
   watch: {
@@ -79,6 +96,16 @@ export default {
     }
   },
   methods: {
+    async getSTStoken() {
+      let that=this;
+      return await this.$post(`${that.originUrl}/api/upload/pic/getSTSToken`).then((res)=>{
+        if(res&&res.code!=0){
+          Toast(res.message);
+        }else{
+          return res;
+        }
+      });
+    },
     removeHtmlStyle(html){
       let reg= /style="[^=>]*"([(\s+\w+=)|>])/g;
       let newHtml='';
@@ -176,6 +203,9 @@ export default {
     },
     uploadImg() {
       this.$refs.uploadinput.click();
+    },
+    uploadVideo() {
+      this.$refs.uploadinputVideo.click();
     },
     getOssKey() {
       let that = this;
@@ -337,7 +367,9 @@ export default {
 
       return blob;
     },
-    onFileChange(e) {
+    //v4上传
+    onFileChange2(e) {
+      //设置光标
       this.selection=window.getSelection();
       if(this.selection&&this.selection.rangeCount<=0){
         // this.$refs.edit.focus();
@@ -356,6 +388,84 @@ export default {
         // this.range.selectAllChildren(textDom);
         // this.range.collapseToEnd()
       }
+      //上传
+      let that=this;
+      console.log(e.target.files);
+      this.positionImg = e.target.getAttribute("name");
+      let file = e.target.files[0];
+      let picType = file.type.split("/")[1];
+      let url = URL.createObjectURL(file);
+      //限制文件上传为图片
+      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
+      if (!imgStr.test(file.name)) {
+        alert("文件不是图片类型");
+        return false;
+      }
+      //截取文件后缀名
+      let temporary = file.name.lastIndexOf(".");
+      let fileNameLength = file.name.length;
+      let fileFormat = file.name.substring(temporary + 1, fileNameLength);//png
+      // that.multipartUploadWithSts(`${VUE_APP_DIR_IMG}${that.uuid()}.${fileFormat}`, file);
+    },
+    multipartUploadWithSts(storeAs, file, cpt) {
+      let that = this;
+      that.multitest(that.clientOss, storeAs, file, cpt);
+    },
+    multitest(ossClient, storeAs, file, cpt) {
+      let that = this;
+      //console.log(file.name + ' => ' + storeAs);
+      var checkpoint_temp;
+      if (cpt) {
+        ossClient
+          .multipartUpload(storeAs, file, {
+            parallel: 2,
+            checkpoint: cpt,
+            progress: function*(percent, cpt) {
+              console.log("Progress: " + percent);
+              checkpoint_temp = cpt;
+            }
+          })
+          .then(function(result) {
+            console.log(result);
+            if(result){
+               if (that.positionImg == "cover") {
+                 that.firstUp = false;
+                that.coverUrl = result.name;
+               }
+              console.log(result.name);
+              // that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
+            }
+          })
+          .catch(function(err) {
+            console.log(err);
+            // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
+          });
+      } else {
+        console.log("multitest without cpt");
+        ossClient
+          .multipartUpload(storeAs, file, {
+            parallel: 2,
+            progress: function*(percent, cpt) {
+              console.log("Progress: " + percent);
+              // that.showProgress = true;
+              that.progress = Math.floor(percent * 100);
+              checkpoint_temp = cpt;
+            }
+          })
+          .then(function(result) {
+           if(that.positionImg == "cover") {
+                 that.firstUp = false;
+                that.coverUrl = result.name;
+            }
+            //  that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
+          })
+          .catch(function(err) {
+            console.log(err);
+            // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
+          });
+      }
+    },
+    onFileChange(e) {
       //保存光标的位置
       // let startNode=document.getElementsByClassName('edit-div')[0];
       // let startOffset=window.getSelection().focusOffset;
@@ -499,7 +609,17 @@ export default {
         // this.value.length>10&&setInterval(function(){
         //   // that.onOk(true,3);
         // },5000)
+    })
+    this.getSTStoken().then(res=>{
+      let store = JSON.parse(res.data);
+      that.clientOss=new OSS({
+        accessKeyId: store.accessKeyId,
+        accessKeySecret: store.accessKeySecret,
+        stsToken: store.securityToken,
+        endpoint: "http://oss-cn-shenzhen.aliyuncs.com",
+        bucket: "imuguang-file"
       })
+    });
   }
 };
 </script>
