@@ -45,7 +45,7 @@ export default {
   name: "appLoad",
   data() {
     return {
-      cdnUrl:'http://file-t.imuguang.com/',
+      cdnUrl:'https://f-bd.imuguang.com/',
       // cdnUrl:'https://aiyu-out.oss-cn-hongkong.aliyuncs.com/',//艾鱼
       toast: "",
       btncount: 0,
