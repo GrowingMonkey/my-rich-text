@@ -698,8 +698,9 @@ export default {
             Toast({ message: "请输入内容", duration: 1000 });
             return;
           }
+          let detail;
           if(type==1){
-            let detail = that.getDetail(that.text).substring(0, 100);
+             detail = that.getDetail(that.text).substring(0, 100);
           }
           if (type==1&&detail.replace(/\s/g, "") == "") {
             Toast({ message: "请输入文字", duration: 1000 });
