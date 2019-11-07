@@ -706,7 +706,7 @@ export default {
             return;
           }
           type!=3&&Toast.loading({
-        duration: 100, // 持续展示 toast
+        duration: 0, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
         loadingType: "spinner",
         message: "发布中"
