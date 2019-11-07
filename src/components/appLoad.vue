@@ -705,7 +705,7 @@ export default {
             that.isDisable = false;
             return;
           }
-          type!=3&&Toast.loading({
+          type==1&&Toast.loading({
         duration: 0, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
         loadingType: "spinner",
