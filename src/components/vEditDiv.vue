@@ -85,7 +85,10 @@ export default {
       editorNode: null,
       selection:'',
       range:'',
-      clientOss:{}
+      clientOss:{},
+      newFileNameArrays:[],
+      fileStatus:[],
+      currentFileIndex:0
     };
   },
   watch: {
@@ -391,21 +394,27 @@ export default {
       //上传
       let that=this;
       console.log(e.target.files);
-      this.positionImg = e.target.getAttribute("name");
-      let file = e.target.files[0];
-      let picType = file.type.split("/")[1];
-      let url = URL.createObjectURL(file);
-      //限制文件上传为图片
-      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
-      if (!imgStr.test(file.name)) {
-        alert("文件不是图片类型");
-        return false;
+      this.positionImg = e.target.getAttribute("name");//拿到点击的按钮,判定是图片上传还是视频上传
+      let fileArrays = e.target.files;//拿到当前file数组  
+      that.fileStatus=new Array(fileArrays.length).fill(false);
+      that.newFileNameArrays=[];//清空数组
+      console.log(that.fileStatus);
+      for(let i=0;i<fileArrays.length;i++){
+        let newFileNameArrays=[];
+          let currentFile=fileArrays[i];
+          that.currentFileIndex=i;//当前file下标
+          let picType = currentFile.type.split("/")[1];
+          let url=URL.createObjectURL(currentFile);
+          //限制当前上传的文件类型
+           //截取文件后缀名
+          let temporary = currentFile.name.lastIndexOf(".");
+          let fileNameLength = currentFile.name.length;
+          let fileFormat = currentFile.name.substring(temporary + 1, fileNameLength);//png
+          //上传的文件名
+          let newFileName=`${that.uuid()}.${fileFormat}`;
+          newFileNameArrays.push(newFileName);
+          that.multipartUploadWithSts(`${VUE_APP_DIR_IMG}${newFileNameArrays[i]}`, currentFile);
       }
-      //截取文件后缀名
-      let temporary = file.name.lastIndexOf(".");
-      let fileNameLength = file.name.length;
-      let fileFormat = file.name.substring(temporary + 1, fileNameLength);//png
-      // that.multipartUploadWithSts(`${VUE_APP_DIR_IMG}${that.uuid()}.${fileFormat}`, file);
     },
     multipartUploadWithSts(storeAs, file, cpt) {
       let that = this;
@@ -428,17 +437,11 @@ export default {
           .then(function(result) {
             console.log(result);
             if(result){
-               if (that.positionImg == "cover") {
-                 that.firstUp = false;
-                that.coverUrl = result.name;
-               }
               console.log(result.name);
-              // that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
             }
           })
           .catch(function(err) {
             console.log(err);
-            // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
           });
       } else {
         console.log("multitest without cpt");

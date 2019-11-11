@@ -530,6 +530,7 @@ export default {
             }
           })
           .then(function(result) {
+            console.log(result);
            if(that.positionImg == "cover") {
                  that.firstUp = false;
                 that.coverUrl = result.name;
