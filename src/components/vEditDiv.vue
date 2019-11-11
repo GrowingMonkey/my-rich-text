@@ -191,7 +191,7 @@ export default {
       let body = signatureObj;
       console.log(body);
       // let host = "https://f-bd.imuguang.com";
-      let host = "https://aiyu-out.oss-cn-hongkong.aliyuncs.com";//艾鱼
+      let host = "https://aiyuout.oss-cn-shenzhen.aliyuncs.com";//艾鱼
       let policyText = {
         expiration: time, //设置该Policy的失效时间，超过这个失效时间之后，就没有办法通过这个policy上传文件了
         conditions: [
@@ -241,13 +241,13 @@ export default {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             // req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
-            req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
+            req.open("GET", `https://aiyuout.oss-cn-shenzhen.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 // that.execCommand('insertimage',`http://file-t.imuguang.com/${newFileName}`);
-                that.execCommand('insertimage',`https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`);//艾鱼
+                that.execCommand('insertimage',`https://aiyuout.oss-cn-shenzhen.aliyuncs.com/${newFileName}`);//艾鱼
                 // let emojiText=document.createElement('IMG');
                 // emojiText.src=`http://file-t.imuguang.com/${newFileName}`;
                 // var range = document.createRange()
@@ -280,14 +280,14 @@ export default {
               req = new ActiveXObject("Microsoft.XMLHTTP");
             }
             // req.open("GET", `http://file-t.imuguang.com/${newFileName}`, true);
-            req.open("GET", `https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}`, true);//艾鱼
+            req.open("GET", `https://aiyuout.oss-cn-shenzhen.aliyuncs.com/${newFileName}`, true);//艾鱼
             req.send();
             req.onreadystatechange = function() {
               if (req.readyState == 4 && req.status == 200) {
                 // 返回的结果，类型是 string
                 if (that.positionImg !== "cover") {
                   // that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
-                that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
+                that.text += `<p class="img-box"><img src="https://aiyuout.oss-cn-shenzhen.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
@@ -496,7 +496,7 @@ export default {
   width: 67px;
   height: 67px;
   // background: url('https://f-bd.imuguang.com/wh/static/img/save_icon.png') no-repeat;
-  background: url('https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/save_icon.png') no-repeat;
+  background: url('https://aiyuout.oss-cn-shenzhen.aliyuncs.com/wh/static/img/save_icon.png') no-repeat;
   background-size: 100%;
 }
 .caogao{
@@ -505,7 +505,7 @@ export default {
   width: 78px;
   height: 72px;
   // background: url('https://f-bd.imuguang.com/wh/static/img/caogao_icon.png') no-repeat;
-  background: url('https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/caogao_icon.png') no-repeat;
+  background: url('https://aiyuout.oss-cn-shenzhen.aliyuncs.com/wh/static/img/caogao_icon.png') no-repeat;
   background-size: 100%;
 }
 .edit-div {
