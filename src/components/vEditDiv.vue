@@ -374,6 +374,7 @@ export default {
       if (res.source) {
         alert("转码成功,请点击按钮刷新");
       } else {
+        alert('正在转码中,请稍后重试');
         if (time.timeStatus) {
           that.getResult(url);
         }
