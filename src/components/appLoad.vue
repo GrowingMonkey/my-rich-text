@@ -84,11 +84,9 @@ export default {
             }).then(() => {
               this.returnPage();
       });
-
     }
     let that=this;
     this.originUrl =VUE_APP_BASEURL;
-    //this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
     if(this.$route.query.caogao_id){
       let draft_data=JSON.parse(window.localStorage.getItem('draft'));
       this.coverUrl=draft_data.bgpUrl||'';
@@ -804,14 +802,16 @@ export default {
             Toast({ message: "请输入内容", duration: 1000 });
             return;
           }
-          let detail = that.getDetail(that.text).substring(0, 100);
-          console.log(detail);
+          let detail;
+          if(type==1){
+             detail = that.getDetail(that.text,type).substring(0, 100);
+          }
           if (type==1&&detail.replace(/\s/g, "") == "") {
             Toast({ message: "请输入文字", duration: 1000 });
             that.isDisable = false;
             return;
           }
-          type!=3&&Toast.loading({
+          type==1&&Toast.loading({
         duration: 100, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
         loadingType: "spinner",
@@ -824,7 +824,7 @@ export default {
                 : `bg/${Math.floor(Math.random() * 5) + 1}.jpg`,
             title: that.title,
             content: that.removeHtmlStyle(that.text.replace('/<a>/g','<p>').replace('/<\/a>/g','</p>').replace(/\n/g, "<br/>")),
-            detail: that.getDetail(that.text).substring(0, 100)
+            detail: that.getDetail(that.text,type).substring(0, 100)
           };
           if(this.$route.query.caogao_id&&type!=1){
             data.id=this.$route.query.caogao_id;
@@ -862,10 +862,10 @@ export default {
         }
       });
     },
-    getDetail(html) {
+    getDetail(html,type) {
       let re = new RegExp("<[^<>]+>", "g");
       let text = html.replace(re, "");
-      if (text == "") {
+      if (type==1&&text == "") {
         Toast({ message: "请输入文字", duration: 1000 });
       }
       //或
