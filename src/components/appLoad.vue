@@ -75,7 +75,6 @@ export default {
     vEditDiv
   },
   mounted() {
-    console.log(VUE_APP_VIDEO);
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
