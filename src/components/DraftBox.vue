@@ -19,7 +19,7 @@
               {{v.createTime?v.createTime:nowDate}}
           </div>
           <div class="draft_detail">
-              {{v.detail?v.detail:'暂无介绍'}}
+              {{v.detail?v.detail.replace('&amp;nbsp;', ""):'暂无介绍'}}
           </div>
           <div class="draft_action">
               <span @click.stop.prevent="jumpEditor(v)">编辑</span>
@@ -31,12 +31,25 @@
   </div>
 </template>
 <script>
+import configuration from "../utils/utils";
+const {
+  NODE_ENV,
+  VUE_APP_BASEURL,
+  VUE_APP_OSSADDRESS,
+  VUE_APP_VIDEO,
+  VUE_APP_CDN,
+  VUE_APP_ENDPOINT,
+  VUE_APP_BUCKET1,
+  VUE_APP_BUCKET2,
+  VUE_APP_DIR_IMG,
+  VUE_APP_DIR_VIDEO
+} = configuration;
 export default {
   name: "DraftBox",
   data() {
     return {
       nowDate:'',
-      originUrl: "http://www.imuguang.com/api",
+      originUrl: `${VUE_APP_BASEURL}/api`,
       //originUrl: "http://www.aiyu2019.com/api",//艾鱼
       draft_list: []
     };
@@ -45,10 +58,7 @@ export default {
     let now_date=new Date();
     this.nowDate=now_date.getFullYear() + '-' + (now_date.getMonth() + 1) + '-' + now_date.getDate();
     let that = this;
-    this.originUrl =
-      window.location.origin.indexOf("www") > -1
-        ? "http://www.imuguang.com/api"
-        : "http://test.imuguang.com/api";
+    this.originUrl =`${VUE_APP_BASEURL}/api`;
       //    this.originUrl =
       // window.location.origin.indexOf("www") > -1
       //   ? "http://www.aiyu2019.com/api"

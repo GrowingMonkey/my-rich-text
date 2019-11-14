@@ -40,12 +40,12 @@ import { Toast,Dialog } from "vant";
 import vEditDiv from "./vEditDiv";
 import qs from "qs";
 import  configuration from '../utils/utils';
-const {VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
+const {NODE_ENV,VUE_APP_BASEURL,VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET1,VUE_APP_BUCKET2,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
 export default {
   name: "appLoad",
   data() {
     return {
-      cdnUrl:'https://f-bd.imuguang.com/',
+      cdnUrl:`${VUE_APP_CDN}/`,
       // cdnUrl:'https://aiyu-out.oss-cn-hongkong.aliyuncs.com/',//艾鱼
       toast: "",
       btncount: 0,
@@ -54,7 +54,7 @@ export default {
       imageUrl: "",
       isDisable: false, //表单重复提交
       coverUrl: "",
-      originUrl: "http://www.imuguang.com",
+      originUrl:VUE_APP_BASEURL,
       //originUrl: "http://www.aiyu2019.com",//艾鱼
       coverImg: "",
       title: "",
@@ -88,7 +88,7 @@ export default {
 
     }
     let that=this;
-    this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.imuguang.com':'http://test.imuguang.com';
+    this.originUrl =VUE_APP_BASEURL;
     //this.originUrl =window.location.origin.indexOf('www')>-1?'http://www.aiyu2019.com':'http://www.aiyu2019.com';//艾鱼
     if(this.$route.query.caogao_id){
       let draft_data=JSON.parse(window.localStorage.getItem('draft'));
@@ -99,7 +99,7 @@ export default {
       this.draftId=draft_data.id;
     }else{
       //自动获取最新草稿数据
-      this.$fetch(that.originUrl + "/api/upload/art/draft/list").then(res => {
+      this.$fetch(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/draft/list`).then(res => {
         if (res && res.code == 0) {
           let list= res.data.list||[];
           if(list.length!=0){
@@ -127,8 +127,8 @@ export default {
         accessKeyId: store.accessKeyId,
         accessKeySecret: store.accessKeySecret,
         stsToken: store.securityToken,
-        endpoint: "http://oss-cn-shenzhen.aliyuncs.com",
-        bucket: "imuguang-file"
+        endpoint: VUE_APP_ENDPOINT,
+        bucket: VUE_APP_BUCKET2
       })
     });
   },
@@ -136,7 +136,7 @@ export default {
     //获取阿里云签名数据
     async getSTStoken() {
       let that=this;
-      return await this.$post(`${that.originUrl}/api/upload/pic/getSTSToken`).then((res)=>{
+      return await this.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`).then((res)=>{
         if(res&&res.code!=0){
           Toast(res.message);
         }else{
@@ -314,7 +314,7 @@ export default {
       let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
-          this.$post(that.originUrl + "/api/upload/art/publish").then(res => {
+          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/publish`).then(res => {
             if (res.code == 0) {
               window.localStorage.setItem("publishId", res.data.id);
               reject(res);
@@ -333,7 +333,7 @@ export default {
         navigator.userAgent.indexOf("Adr") > -1
       ) {
         if (this.times != 1) {
-          window.location.href = "jsbridge://www.imuguang.com/timeClose";
+          window.location.href = `jsbridge://${VUE_APP_BASEURL}/timeClose`;
           //window.location.href = "jsbridge://www.aiyu2019.com/timeClose";//艾鱼
         }
         // alert(window.dove.closePage);
@@ -386,7 +386,7 @@ export default {
         duration: 0, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
         loadingType: "spinner",
-        message: "上传中"
+        message: "上传中1"
       });
       let reader = new FileReader();
       //file转base64
@@ -414,7 +414,7 @@ export default {
           }
           //获取上传oss秘钥
           that
-            .$post(`${that.originUrl}/api/upload/pic/getSTSToken`)
+            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`)
             .then(res => {
               if(res['code']!=0){
                 Toast({ message: '上传失败', duration: 1000 });
@@ -471,6 +471,9 @@ export default {
     },
     //封面上传
     onFileChange2(e){
+      if(e.target.files.length==0){
+        return;
+      }
       let that=this;
       this.positionImg = e.target.getAttribute("name");
       let file = e.target.files[0];
@@ -588,15 +591,15 @@ export default {
             that.returnPage();
           }
           that
-            .$post(`${that.originUrl}/api/upload/pic/getSTSToken`)
+            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`)
             .then(res => {
               let store = JSON.parse(res.data);
               let client = new OSS.Wrapper({
                 accessKeyId: store.accessKeyId,
                 accessKeySecret: store.accessKeySecret,
                 stsToken: store.securityToken,
-                endpoint: "http://oss-cn-shenzhen.aliyuncs.com",
-                bucket: "imuguang-file"
+                endpoint: VUE_APP_ENDPOINT,
+                bucket: VUE_APP_BUCKET2
               });
               console.log(store);
               console.log(blobFile);
@@ -831,13 +834,13 @@ export default {
             data.id=that.draftId||window.localStorage.getItem('draft_id');
           }
           that
-            .$post(`${that.originUrl}/api/upload${commit_url}`, data)
+            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload${commit_url}`, data)
             .then(Response => {
               if (Response.code == 0&&type==1) {//1为发布
                   //删除草稿
                   console.log(that.draftId);
                   let data={ids:that.draftId};
-                  that.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
+                  that.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/draft/del`,data).then(res=>{
                     if(res&&res.code==0){
                         //关闭页面
                         window.localStorage.setItem("publishId", "");
@@ -1137,6 +1140,11 @@ export default {
   /* margin-top: 9px; */
   height: 63px;
   background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png") no-repeat;
+  /* background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 艾鱼 */
+  background-size: 100%;
+}
+.dove-footer .btn-box .video-btn::after {
+   background: url("https://f-bd.imuguang.com/wh/static/img/send_video_icon.png") no-repeat;
   /* background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 艾鱼 */
   background-size: 100%;
 }

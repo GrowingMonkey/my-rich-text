@@ -25,7 +25,6 @@ axios.interceptors.request.use(
     }else{
       config.headers=typeObj;
     }
-    console.log(config.headers);
     if(id){
       config.headers['publish-id']=id;
       // alert(JSON.stringify(config.headers));
@@ -41,7 +40,6 @@ axios.interceptors.request.use(
 //http response 拦截器
 axios.interceptors.response.use(
   response => {
-    console.log(response);
     if (response.data.errCode == 2) {
       router.push({
         path: "/login",
@@ -91,7 +89,6 @@ export function post(url, data = {}) {
   return new Promise((resolve, reject) => {
     axios.post(url, qs.stringify(data))
       .then(response => {
-        console.log(response.data);
         resolve(response.data);
       }, err => {
         reject(err)
