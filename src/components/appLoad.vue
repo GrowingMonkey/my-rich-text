@@ -96,7 +96,7 @@ export default {
       this.draftId=draft_data.id;
     }else{
       //自动获取最新草稿数据
-      this.$fetch(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/draft/list`).then(res => {
+      this.$fetch(that.originUrl + `/${NODE_ENV=='aiyu'?'api':'api'}/upload/art/draft/list`).then(res => {
         if (res && res.code == 0) {
           let list= res.data.list||[];
           if(list.length!=0){
@@ -133,7 +133,7 @@ export default {
     //获取阿里云签名数据
     async getSTStoken() {
       let that=this;
-      return await this.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`).then((res)=>{
+      return await this.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`).then((res)=>{
         if(res&&res.code!=0){
           Toast(res.message);
         }else{
@@ -311,7 +311,7 @@ export default {
       let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
-          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/publish`).then(res => {
+          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'api':'api'}/upload/art/publish`).then(res => {
             if (res.code == 0) {
               window.localStorage.setItem("publishId", res.data.id);
               reject(res);
@@ -411,7 +411,7 @@ export default {
           }
           //获取上传oss秘钥
           that
-            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`)
+            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`)
             .then(res => {
               if(res['code']!=0){
                 Toast({ message: '上传失败', duration: 1000 });
@@ -588,7 +588,7 @@ export default {
             that.returnPage();
           }
           that
-            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`)
+            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`)
             .then(res => {
               let store = JSON.parse(res.data);
               let client = new OSS.Wrapper({
@@ -833,23 +833,22 @@ export default {
             data.id=that.draftId||window.localStorage.getItem('draft_id');
           }
           that
-            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload${commit_url}`, data)
+            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload${commit_url}`, data)
             .then(Response => {
-              if (Response.code == 0&&type==1) {//1为发布
-                  //删除草稿
-                  console.log(that.draftId);
-                  let data={ids:that.draftId};
-                  that.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/draft/del`,data).then(res=>{
-                    if(res&&res.code==0){
-                        //关闭页面
-                        window.localStorage.setItem("publishId", "");
-                        window.localStorage.removeItem("draft_id");
-                         that.returnPage();
-                    }
-                  })
+              if (Response.code == 0&&type==1) {
+                window.localStorage.setItem("publishId", "");
+                window.localStorage.removeItem("draft_id");
+                //清除草稿
+                 let data={ids:that.draftId};
+                that.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
+                console.log(res);
+                if(res&&res.code==0){
+                  that.returnPage();
+                }
+              })
                 that.times += 1;
                 // that.returnPage();
-              } else if(Response.code == 0&&type==3){//3为保存草稿
+              }  else if(Response.code == 0&&type==3){//3为保存草稿
                 that.draftId=Response.data.id;
                  window.localStorage.setItem("publishId", "");
                  window.localStorage.setItem("draft_id",Response.data.id);

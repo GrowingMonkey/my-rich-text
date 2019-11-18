@@ -115,7 +115,7 @@ export default {
     async getSTStoken() {
       let that = this;
       return await this.$post(
-        `${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`
+        `${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`
       ).then(res => {
         if (res && res.code != 0) {
           Toast(res.message);
@@ -236,7 +236,7 @@ export default {
       let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
-          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/art/publish`).then(res => {
+          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'api':'api'}/upload/art/publish`).then(res => {
             if (res && res.code == 0) {
               window.localStorage.setItem("publishId", res.data.id);
               reject(res);
@@ -257,7 +257,7 @@ export default {
     },
     getOssKey() {
       let that = this;
-      return that.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'adapi':'api'}/upload/pic/getSTSToken`);
+      return that.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`);
     },
     convertToBlob(base64Str, fileType) {
       var base64 = window.atob(base64Str);
