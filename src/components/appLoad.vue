@@ -40,7 +40,7 @@ import { Toast,Dialog } from "vant";
 import vEditDiv from "./vEditDiv";
 import qs from "qs";
 import  configuration from '../utils/utils';
-const {NODE_ENV,VUE_APP_BASEURL,VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET1,VUE_APP_BUCKET2,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
+const {NODE_ENV,VUE_APP_CLOSE,VUE_APP_BASEURL,VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET1,VUE_APP_BUCKET2,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
 export default {
   name: "appLoad",
   data() {
@@ -330,7 +330,7 @@ export default {
         navigator.userAgent.indexOf("Adr") > -1
       ) {
         if (this.times != 1) {
-          window.location.href = `jsbridge://${VUE_APP_BASEURL}/timeClose`;
+          window.location.href = `jsbridge://${VUE_APP_CLOSE}/timeClose`;
           //window.location.href = "jsbridge://www.aiyu2019.com/timeClose";//艾鱼
         }
         // alert(window.dove.closePage);
@@ -812,7 +812,7 @@ export default {
             return;
           }
           type==1&&Toast.loading({
-        duration: 100, // 持续展示 toast
+        duration: 3000, // 持续展示 toast
         forbidClick: true, // 禁用背景点击
         loadingType: "spinner",
         message: "发布中"
@@ -841,7 +841,6 @@ export default {
                 //清除草稿
                  let data={ids:that.draftId};
                 that.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
-                console.log(res);
                 if(res&&res.code==0){
                   that.returnPage();
                 }

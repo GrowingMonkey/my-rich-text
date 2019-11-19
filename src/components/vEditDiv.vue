@@ -330,8 +330,6 @@ export default {
       that.fileSuccStatus = new Array(fileArrays.length).fill(false);
       that.newFileNameArrays = []; //清空数组
       console.log(that.fileStatus);
-      if (that.positionImg == "videoContent") {
-      }
       for (let i = 0; i < fileArrays.length; i++) {
         let currentFile = fileArrays[i];
         that.currentFileIndex = i; //当前file下标
@@ -346,6 +344,13 @@ export default {
           temporary + 1,
           fileNameLength
         ); //png
+         if (that.positionImg == "videoContent") {
+          if(fileFormat!='mp4'){
+            alert('只能上传mp4格式视频');
+            this.allToast.clear();
+            return;
+          }
+        }
         //上传的文件名
         let newFileName = `${that.uuid()}.${fileFormat}`;
         if (that.positionImg == "imgContent") {
