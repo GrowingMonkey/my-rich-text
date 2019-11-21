@@ -377,7 +377,7 @@ export default {
       let res = await that.getSourceStatus(url);
       let time = await that.getTimeStatus();
       if (res.source) {
-        alert("转码成功,请点击按钮刷新");
+        alert("转码成功");
       } else {
         alert('正在转码中,请稍后重试');
         if (time.timeStatus) {
@@ -399,10 +399,11 @@ export default {
         request.open("GEt", url), true;
         request.send();
         request.onreadystatechange = function() {
-          if (request.readyState == 2 && request.status == 200) {
-            resolve({ source: true });
-          } else {
+          console.log(request.status,request.readyState);
+          if (request.status == 404) {
             resolve({ source: false });
+          } else {
+           resolve({ source: true });
           }
         };
       });
@@ -511,7 +512,10 @@ export default {
       return `<p><video class="edit-video" src="${VUE_APP_CDN}/${val.replace(
         "input",
         "output"
-      )}" controls="controls" style="width:100%"></video></p><input class="video-btn" disabled value="点击查看视频转码"/><p>&nbsp;</p>`;
+      )}" controls="controls" style="width:100%" poster="${VUE_APP_CDN}/${val.replace(
+        "input",
+        "output"
+      )}"></video></p><input class="video-btn" disabled value="点击查看视频转码"/><p>&nbsp;</p>`;
     },
     arraysAllTrue(item) {
       return item === true;
@@ -778,12 +782,14 @@ export default {
   border-radius: 5px !important;
   border: 1px dashed rgba(151, 151, 151, 1) !important;
   color: #b7b7b7 !important;
+  box-sizing: border-box !important;
   font-size: 22px !important;
   text-align: center;
   background: #fff;
 }
 .edit-div > p video {
   width: 100%;
+  height: 620px;
 }
 .edit-div span {
   font-size: 52px !important;

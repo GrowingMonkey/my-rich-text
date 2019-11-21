@@ -15,15 +15,15 @@
             v-if="coverUrl"
             crossorigin="anonymous"
             :data-src="coverUrl"
-          >
+          />
           <label class="cover-btn button is-danger" :class="{'active':!firstUp}">
             选择封面
-            <input type="file" @change="onFileChange2" accept="image/*" name="cover">
+            <input type="file" @change="onFileChange2" accept="image/*" name="cover" />
           </label>
         </div>
         <p class="dove-title" @click="changeStyle">
           <span :class="{'active':!boolStyle}">请输入标题</span>
-          <input type="text" ref="title" v-model="title" maxlength="35">
+          <input type="text" ref="title" v-model="title" maxlength="35" />
         </p>
       </div>
     </div>
@@ -35,17 +35,29 @@
 </template>
 <script>
 import axios from "axios";
-import OSS from 'ali-oss';
-import { Toast,Dialog } from "vant";
+import OSS from "ali-oss";
+import { Toast, Dialog } from "vant";
 import vEditDiv from "./vEditDiv";
 import qs from "qs";
-import  configuration from '../utils/utils';
-const {NODE_ENV,VUE_APP_CLOSE,VUE_APP_BASEURL,VUE_APP_OSSADDRESS,VUE_APP_VIDEO,VUE_APP_CDN,VUE_APP_ENDPOINT,VUE_APP_BUCKET1,VUE_APP_BUCKET2,VUE_APP_DIR_IMG,VUE_APP_DIR_VIDEO}=configuration;
+import configuration from "../utils/utils";
+const {
+  NODE_ENV,
+  VUE_APP_CLOSE,
+  VUE_APP_BASEURL,
+  VUE_APP_OSSADDRESS,
+  VUE_APP_VIDEO,
+  VUE_APP_CDN,
+  VUE_APP_ENDPOINT,
+  VUE_APP_BUCKET1,
+  VUE_APP_BUCKET2,
+  VUE_APP_DIR_IMG,
+  VUE_APP_DIR_VIDEO
+} = configuration;
 export default {
   name: "appLoad",
   data() {
     return {
-      cdnUrl:`${VUE_APP_CDN}/`,
+      cdnUrl: `${VUE_APP_CDN}/`,
       // cdnUrl:'https://aiyu-out.oss-cn-hongkong.aliyuncs.com/',//艾鱼
       toast: "",
       btncount: 0,
@@ -54,7 +66,7 @@ export default {
       imageUrl: "",
       isDisable: false, //表单重复提交
       coverUrl: "",
-      originUrl:VUE_APP_BASEURL,
+      originUrl: VUE_APP_BASEURL,
       //originUrl: "http://www.aiyu2019.com",//艾鱼
       coverImg: "",
       title: "",
@@ -65,10 +77,10 @@ export default {
       token: "",
       boolStyle: true,
       boolStyle2: true,
-      contentHeight:'calc(100vh - 15.29791vw - 64.41224vw)',
-      draftId:'',
+      contentHeight: "calc(100vh - 15.29791vw - 64.41224vw)",
+      draftId: "",
       //v4
-      clientOss:{}
+      clientOss: {}
     };
   },
   components: {
@@ -78,77 +90,86 @@ export default {
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
-    if((!header.token)||header.token=='undefined'){
-       Dialog.alert({
-            message:'获取用户信息错误'
-            }).then(() => {
-              this.returnPage();
+    if (!header.token || header.token == "undefined") {
+      Dialog.alert({
+        message: "获取用户信息错误"
+      }).then(() => {
+        this.returnPage();
       });
     }
-    let that=this;
-    this.originUrl =VUE_APP_BASEURL;
-    if(this.$route.query.caogao_id){
-      let draft_data=JSON.parse(window.localStorage.getItem('draft'));
-      this.coverUrl=draft_data.bgpUrl||'';
-      this.title=draft_data.title||'';
-      this.detail=draft_data.detail||'';
-      this.text=draft_data.content||'';
-      this.draftId=draft_data.id;
-    }else{
+    let that = this;
+    this.originUrl = VUE_APP_BASEURL;
+    if (this.$route.query.caogao_id) {
+      let draft_data = JSON.parse(window.localStorage.getItem("draft"));
+      this.coverUrl = draft_data.bgpUrl || "";
+      this.title = draft_data.title || "";
+      this.detail = draft_data.detail || "";
+      this.text = draft_data.content || "";
+      this.draftId = draft_data.id;
+    } else {
       //自动获取最新草稿数据
-      this.$fetch(that.originUrl + `/${NODE_ENV=='aiyu'?'api':'api'}/upload/art/draft/list`).then(res => {
+      this.$fetch(
+        that.originUrl +
+          `/${NODE_ENV == "aiyu" ? "api" : "api"}/upload/art/draft/list`
+      ).then(res => {
         if (res && res.code == 0) {
-          let list= res.data.list||[];
-          if(list.length!=0){
-             that.coverUrl=list[0].bgpUrl;
-             that.title=list[0].title;
-             that.detail=list[0].detail;
-             that.text=list[0].content;
-             that.draftId=list[0].id;
-             window.localStorage.setItem("draft_id",list[0].id);
-             this.$nextTick(()=>{
-                document.getElementById('edit-div').innerHTML=list[0].content;
-                // this.value.length>10&&setInterval(function(){
-                //   // that.onOk(true,3);
-                // },5000)
-            })
-          }else{
-            that.submitForm(true,3);
+          let list = res.data.list || [];
+          if (list.length != 0) {
+            that.coverUrl = list[0].bgpUrl;
+            that.title = list[0].title;
+            that.detail = list[0].detail;
+            that.text = list[0].content;
+            that.draftId = list[0].id;
+            window.localStorage.setItem("draft_id", list[0].id);
+            this.$nextTick(() => {
+              document.getElementById("edit-div").innerHTML = list[0].content;
+              // this.value.length>10&&setInterval(function(){
+              //   // that.onOk(true,3);
+              // },5000)
+            });
+          } else {
+            that.submitForm(true, 3);
           }
-        } 
+        }
       });
     }
-    this.getSTStoken().then(res=>{
+    this.getSTStoken().then(res => {
       let store = JSON.parse(res.data);
-      that.clientOss=new OSS({
+      that.clientOss = new OSS({
         accessKeyId: store.accessKeyId,
         accessKeySecret: store.accessKeySecret,
         stsToken: store.securityToken,
         endpoint: VUE_APP_ENDPOINT,
         bucket: VUE_APP_BUCKET2
-      })
+      });
     });
   },
   methods: {
     //获取阿里云签名数据
     async getSTStoken() {
-      let that=this;
-      return await this.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`).then((res)=>{
-        if(res&&res.code!=0){
+      let that = this;
+      return await this.$post(
+        `${that.originUrl}/${
+          NODE_ENV == "aiyu" ? "api" : "api"
+        }/upload/pic/getSTSToken`
+      ).then(res => {
+        if (res && res.code != 0) {
           Toast(res.message);
-        }else{
+        } else {
           return res;
         }
       });
     },
-    clearMethod(){
-      this.title='';
-      this.coverUrl='';
-      this.text="<p><br></p>";
+    clearMethod() {
+      this.title = "";
+      this.coverUrl = "";
+      this.text = "<p><br></p>";
     },
     GetRequest() {
-      let url = window.location.search ? window.location.search : window.location.hash; //获取url中"?"符后的字串 
-      if (url.indexOf('#') != -1) {
+      let url = window.location.search
+        ? window.location.search
+        : window.location.hash; //获取url中"?"符后的字串
+      if (url.indexOf("#") != -1) {
         url = url.slice(2);
       }
       let theRequest = new Object();
@@ -206,7 +227,7 @@ export default {
       let signature = Crypto.util.bytesToBase64(bytes);
       let newFileName = `img/${that.uuid()}${fileType}`;
       //组装发送数据
-      let request = new FormData();  
+      let request = new FormData();
       request.append("name", `${file.name}`);
       request.append("key", newFileName);
       request.append("OSSAccessKeyId", accessid); //Bucket 拥有者的Access Key Id。
@@ -273,7 +294,6 @@ export default {
                 if (that.positionImg !== "cover") {
                   that.text += `<p class="img-box"><img src="http://file-t.imuguang.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;
                   // that.text += `<p class="img-box"><img src="https://aiyu-out.oss-cn-hongkong.aliyuncs.com/${newFileName}" style="margin:0 auto;margin-top:20px;width:100%;"/></p><p class="edit-clear"> </p>`;//艾鱼
-  
                 } else {
                   that.firstUp = false;
                   that.coverUrl = newFileName;
@@ -283,11 +303,11 @@ export default {
               } else {
                 // Toast("上传失败");
                 Toast.clear();
-      //           that.toast=Toast({
-      //   duration: 2000, // 持续展示 toast
-        
-      //   message: "上传失败"
-      // });
+                //           that.toast=Toast({
+                //   duration: 2000, // 持续展示 toast
+
+                //   message: "上传失败"
+                // });
               }
             };
           }
@@ -311,7 +331,10 @@ export default {
       let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
-          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'api':'api'}/upload/art/publish`).then(res => {
+          this.$post(
+            that.originUrl +
+              `/${NODE_ENV == "aiyu" ? "api" : "api"}/upload/art/publish`
+          ).then(res => {
             if (res.code == 0) {
               window.localStorage.setItem("publishId", res.data.id);
               reject(res);
@@ -403,25 +426,28 @@ export default {
           if (res.code != 0) {
             // alert("服务端错误");
             Dialog.alert({
-            title: '服务端错误',
-            message:res.message
-            })
+              title: "服务端错误",
+              message: res.message
+            });
             Toast.clear();
             that.returnPage();
           }
           //获取上传oss秘钥
           that
-            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`)
+            .$post(
+              `${that.originUrl}/${
+                NODE_ENV == "aiyu" ? "api" : "api"
+              }/upload/pic/getSTSToken`
+            )
             .then(res => {
-              if(res['code']!=0){
-                Toast({ message: '上传失败', duration: 1000 });
-              }else{
-
-              let store = JSON.parse(res.data);
-              console.log(store);
-              //oss直传
-              let fileType = "." + file.name.split(".")[1];
-              that.get_signature(store, file, fileType);
+              if (res["code"] != 0) {
+                Toast({ message: "上传失败", duration: 1000 });
+              } else {
+                let store = JSON.parse(res.data);
+                console.log(store);
+                //oss直传
+                let fileType = "." + file.name.split(".")[1];
+                that.get_signature(store, file, fileType);
               }
               // let client = new OSS.Wrapper({
               //   accessKeyId: store.accessKeyId,
@@ -467,11 +493,11 @@ export default {
       };
     },
     //封面上传
-    onFileChange2(e){
-      if(e.target.files.length==0){
+    onFileChange2(e) {
+      if (e.target.files.length == 0) {
         return;
       }
-      let that=this;
+      let that = this;
       this.positionImg = e.target.getAttribute("name");
       let file = e.target.files[0];
       let picType = file.type.split("/")[1];
@@ -485,8 +511,11 @@ export default {
       //截取文件后缀名
       let temporary = file.name.lastIndexOf(".");
       let fileNameLength = file.name.length;
-      let fileFormat = file.name.substring(temporary + 1, fileNameLength);//png
-      that.multipartUploadWithSts(`${VUE_APP_DIR_IMG}${that.uuid()}.${fileFormat}`, file);
+      let fileFormat = file.name.substring(temporary + 1, fileNameLength); //png
+      that.multipartUploadWithSts(
+        `${VUE_APP_DIR_IMG}${that.uuid()}.${fileFormat}`,
+        file
+      );
     },
     multitest(ossClient, storeAs, file, cpt) {
       let that = this;
@@ -504,11 +533,11 @@ export default {
           })
           .then(function(result) {
             console.log(result);
-            if(result){
-               if (that.positionImg == "cover") {
-                 that.firstUp = false;
+            if (result) {
+              if (that.positionImg == "cover") {
+                that.firstUp = false;
                 that.coverUrl = result.name;
-               }
+              }
               console.log(result.name);
               // that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
             }
@@ -531,9 +560,9 @@ export default {
           })
           .then(function(result) {
             console.log(result);
-           if(that.positionImg == "cover") {
-                 that.firstUp = false;
-                that.coverUrl = result.name;
+            if (that.positionImg == "cover") {
+              that.firstUp = false;
+              that.coverUrl = result.name;
             }
             //  that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
           })
@@ -581,14 +610,18 @@ export default {
         this.getpublishId().then(res => {
           if (res.code != 0) {
             Dialog.alert({
-            title: '服务端错误',
-            message:res.message
-            })
+              title: "服务端错误",
+              message: res.message
+            });
             Toast.clear();
             that.returnPage();
           }
           that
-            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`)
+            .$post(
+              `${that.originUrl}/${
+                NODE_ENV == "aiyu" ? "api" : "api"
+              }/upload/pic/getSTSToken`
+            )
             .then(res => {
               let store = JSON.parse(res.data);
               let client = new OSS.Wrapper({
@@ -699,11 +732,11 @@ export default {
     //     };
     //   });
     // },
-    removeHtmlStyle(html){
-      let reg= /style="[^=>]*"([(\s+\w+=)|>])/g;
-      let newHtml='';
-      if(html){
-        newHtml=html.replace(reg,'$1');
+    removeHtmlStyle(html) {
+      let reg = /style="[^=>]*"([(\s+\w+=)|>])/g;
+      let newHtml = "";
+      if (html) {
+        newHtml = html.replace(reg, "$1");
       }
       return newHtml;
     },
@@ -768,31 +801,143 @@ export default {
         range.select();
       }
     },
+    //定义方法上传第三方图片//获取src第三方地址
+    isHaveOtherImg() {
+      let str = this.detail;
+      let regTag = new RegExp(/<img\b.*?(?:>|\/>)/gi);
+      let regSrc = new RegExp(/\s+\bsrc="([^"]*)"/g);
+      let arrImg = str.match(regTag);
+      let arrSrc = str.match(regSrc);
+      let arrImgAll = str.match(regTag);
+      let arrImgUpload = []; //第三方img标签
+      let arrSrcUpload = []; //第三方src
+      for (let i = 0; i < arrImgAll.length; i++) {
+        let domObj = document.createElement("div");
+        domObj.innerHTML = arrImgAll[i];
+        console.log(domObj.childNodes);
+        if (
+          !domObj.childNodes[0].hasAttribute("name") &&
+          domObj.childNodes[0].getAttribute("name") != "oneupload"
+        ) {
+          console.log("没有"); //第三方
+          arrImgUpload.push(arrImgAll[i]);
+        }
+      }
+      if (arrImgUpload) {
+        for (item of arrImgUpload) {
+          let url = item
+            .match(regSrc)[0]
+            .split("src=")[1]
+            .replace(/'|"/g, "");
+          arrSrcUpload.push(url);
+        }
+      }
+      return arrSrcUpload;
+    },
+    getBase64() {
+      return new Promise((resolve, reject) => {
+        function getBase64Image(img, width, height) {
+          //width、height调用时传入具体像素值，控制大小 ,不传则默认图像大小
+          var canvas = document.createElement("canvas");
+          canvas.width = width ? width : img.width;
+          canvas.height = height ? height : img.height;
+
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          var dataURL = canvas.toDataURL();
+          return dataURL;
+        }
+        var image = new Image();
+        image.crossOrigin = "";
+        image.src = img;
+        if (img) {
+          image.onload = function() {
+            resolve(getBase64Image(image)); //将base64传给done上传处理
+          };
+          // return deferred.promise();
+        }
+      });
+    },
+    dataURLtoBlob(dataurl) {
+      var arr = dataurl.split(","),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], {
+        type: mime
+      });
+    },
+    blobToFile(theBlob, fileName) {
+      // new File([blob], filename, {type: contentType, lastModified: Date.now()});
+      // theBlob.lastModifiedDate = new Date();
+      // theBlob.name = fileName;
+      return new File([theBlob], fileName, {
+        type: "",
+        lastModified: Date.now()
+      });
+      // return theBlob;
+    },
     // //定义app调用的方法
-    submitForm(val,type) {
-      if(type=='clear'){
+    async submitForm(val, type) {
+      let that = this;
+      console.log(type);
+      if (type == "clear") {
         this.clearMethod();
         return;
       }
-      this.isDisable=val;
-      let commit_url='/art/commit';
-      if(type==1){
-        commit_url='/art/commit';
-
-      }else{
-        commit_url='/art/draft/change'
+      this.isDisable = val;
+      if (type == 1) {
+        let arrSrcUpload = this.isHaveOtherImg();
+        for (let i = 0; i < arrSrcUpload.length; i++) {
+          let currentUrl = arrSrcUpload[i];
+          let currentFile = {};
+          currentFile.type = currentUrl.split("?")[0].split(".")[
+            currentUrl.split("?")[0].split(".").length - 1
+          ];
+          currentFile.fileName = currentUrl.split("?")[0].split("/")[
+            currentUrl.split("?")[0].split("/").length - 1
+          ];
+          let base64 = await that.getBase64(currentUrl);
+          let bolbFile = that.dataURLtoBlob(base64);
+          currentFile.file = that.blobToFile(bolbFile, currentFile.fileName);
+          let fileName = `others/${currentFile.fileName}`;
+          console.log("文件名:" + fileName);
+          // multipartUploadWithSts(clientOss,`img/${new Date().getTime()}.jpg`,fileDate);
+          let resut = await that.clientOss.multipartUpload(
+            fileName,
+            currentFile.file
+          );
+          // .then(function (result) {
+          //     // var url = result.res.requestUrls[0];
+          //     // var length = url.lastIndexOf('?');
+          //     // var imgUrl = length > 0 ? url.substr(0, length) : url; // 文件最终路径
+          //     console.log(result);
+          // }).catch(function (err) {
+          //     console.log(err);
+          // });
+          console.log(resut);
+        }
       }
-      let that = this;
+      let commit_url = "/art/commit";
+      if (type == 1) {
+        commit_url = "/art/commit";
+      } else {
+        commit_url = "/art/draft/change";
+      }
       that.isDisable = true;
       this.getpublishId().then(res => {
         if (res.code != 0) {
           Dialog.alert({
-            title: '服务端错误',
-            message:res.message
-            })
+            title: "服务端错误",
+            message: res.message
+          });
           that.returnPage();
         } else {
-          if (type==1&&!that.title) {
+          if (type == 1 && !that.title) {
             Toast({ message: "请输入标题", duration: 1000 });
             that.isDisable = false;
             return;
@@ -803,56 +948,70 @@ export default {
             return;
           }
           let detail;
-          if(type==1){
-             detail = that.getDetail(that.text,type).substring(0, 100);
+          if (type == 1) {
+            detail = that.getDetail(that.text, type).substring(0, 100);
           }
-          if (type==1&&detail.replace(/\s/g, "") == "") {
+          if (type == 1 && detail.replace(/\s/g, "") == "") {
             Toast({ message: "请输入文字", duration: 1000 });
             that.isDisable = false;
             return;
           }
-          type==1&&Toast.loading({
-        duration: 3000, // 持续展示 toast
-        forbidClick: true, // 禁用背景点击
-        loadingType: "spinner",
-        message: "发布中"
-      });
+          type == 1 &&
+            Toast.loading({
+              duration: 3000, // 持续展示 toast
+              forbidClick: true, // 禁用背景点击
+              loadingType: "spinner",
+              message: "发布中"
+            });
           let data = {
             bgpUrl:
               that.coverUrl && that.coverUrl !== ""
                 ? that.coverUrl
                 : `bg/${Math.floor(Math.random() * 5) + 1}.jpg`,
             title: that.title,
-            content: that.removeHtmlStyle(that.text.replace('/<a>/g','<p>').replace('/<\/a>/g','</p>').replace(/\n/g, "<br/>")),
-            detail: that.getDetail(that.text,type).substring(0, 100)
+            content: that.removeHtmlStyle(
+              that.text
+                .replace("/<a>/g", "<p>")
+                .replace("/</a>/g", "</p>")
+                .replace(/\n/g, "<br/>")
+            ),
+            detail: that.getDetail(that.text, type).substring(0, 100)
           };
-          if(this.$route.query.caogao_id&&type!=1){
-            data.id=this.$route.query.caogao_id;
+          if (this.$route.query.caogao_id && type != 1) {
+            data.id = this.$route.query.caogao_id;
           }
-          if(window.localStorage.getItem('draft_id')&&type==3){
-            data.id=that.draftId||window.localStorage.getItem('draft_id');
+          if (window.localStorage.getItem("draft_id") && type == 3) {
+            data.id = that.draftId || window.localStorage.getItem("draft_id");
           }
           that
-            .$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload${commit_url}`, data)
+            .$post(
+              `${that.originUrl}/${
+                NODE_ENV == "aiyu" ? "api" : "api"
+              }/upload${commit_url}`,
+              data
+            )
             .then(Response => {
-              if (Response.code == 0&&type==1) {
+              if (Response.code == 0 && type == 1) {
                 window.localStorage.setItem("publishId", "");
                 window.localStorage.removeItem("draft_id");
                 //清除草稿
-                 let data={ids:that.draftId};
-                that.$post(that.originUrl + "/api/upload/art/draft/del",data).then(res=>{
-                if(res&&res.code==0){
-                  that.returnPage();
-                }
-              })
+                let data = { ids: that.draftId };
+                that
+                  .$post(that.originUrl + "/api/upload/art/draft/del", data)
+                  .then(res => {
+                    if (res && res.code == 0) {
+                      that.returnPage();
+                    }
+                  });
                 that.times += 1;
                 // that.returnPage();
-              }  else if(Response.code == 0&&type==3){//3为保存草稿
-                that.draftId=Response.data.id;
-                 window.localStorage.setItem("publishId", "");
-                 window.localStorage.setItem("draft_id",Response.data.id);
-              }else{
-                 window.localStorage.setItem("publishId", "");
+              } else if (Response.code == 0 && type == 3) {
+                //3为保存草稿
+                that.draftId = Response.data.id;
+                window.localStorage.setItem("publishId", "");
+                window.localStorage.setItem("draft_id", Response.data.id);
+              } else {
+                window.localStorage.setItem("publishId", "");
                 Toast({ message: Response.message, duration: 1000 });
               }
               that.isDisable = false;
@@ -860,10 +1019,10 @@ export default {
         }
       });
     },
-    getDetail(html,type) {
+    getDetail(html, type) {
       let re = new RegExp("<[^<>]+>", "g");
       let text = html.replace(re, "");
-      if (type==1&&text == "") {
+      if (type == 1 && text == "") {
         Toast({ message: "请输入文字", duration: 1000 });
       }
       //或
@@ -901,13 +1060,13 @@ export default {
 };
 </script>
 <style>
-.fixedClass{
+.fixedClass {
   overflow: hidden;
 }
-.fixedClass::after{
-   clear: both;
-   display: block;
-   content: '';
+.fixedClass::after {
+  clear: both;
+  display: block;
+  content: "";
 }
 #app {
   width: 100vw;
@@ -983,7 +1142,7 @@ export default {
   /* top: 90%;
   right: 10%; */
   background: rgba(0, 0, 0, 0.5);
-  width:200px;
+  width: 200px;
   font-size: 40px;
   top: 80%;
   left: 80%;
@@ -1044,7 +1203,7 @@ export default {
   color: rgba(201, 201, 201, 1);
   position: absolute;
   top: 50%;
-   transform: translate(0, -50%);
+  transform: translate(0, -50%);
   /* display: block; */
 }
 .dove-title .active {
@@ -1054,7 +1213,7 @@ export default {
   border: none;
   display: inline-block;
   margin: 0;
-  padding-left:1px !important;
+  padding-left: 1px !important;
   width: 100%;
   /* height: 73px; */
   font-size: 73px;
@@ -1109,19 +1268,19 @@ export default {
 .dove-footer .btn-box {
   display: flex;
   /* width:100%; */
-  height:100%;
+  height: 100%;
   flex-direction: column;
   align-items: center;
-  justify-content:center;
-  background:none;
-  border:none;
+  justify-content: center;
+  background: none;
+  border: none;
   position: relative;
 }
 .dove-footer .btn-box .up-btn {
   cursor: pointer;
   margin-top: 9px;
-  background:none;
-  border:none;
+  background: none;
+  border: none;
   text-align: center;
   font-size: 28px;
   font-family: PingFang-SC-Medium;
@@ -1136,12 +1295,14 @@ export default {
   width: 68px;
   /* margin-top: 9px; */
   height: 63px;
-  background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png") no-repeat;
+  background: url("https://f-bd.imuguang.com/wh/static/img/send_icon.png")
+    no-repeat;
   /* background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 艾鱼 */
   background-size: 100%;
 }
 .dove-footer .btn-box .video-btn::after {
-   background: url("https://f-bd.imuguang.com/wh/static/img/send_video_icon.png") no-repeat;
+  background: url("https://f-bd.imuguang.com/wh/static/img/send_video_icon.png")
+    no-repeat;
   /* background: url("https://aiyu-out.oss-cn-hongkong.aliyuncs.com/wh/static/img/send_icon.png") no-repeat; 艾鱼 */
   background-size: 100%;
 }
