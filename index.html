@@ -10,30 +10,32 @@
   <script>
     //页面加载的时候ios调用该方法设置header
     window.localStorage.clear();
-    console.log(1);
-    function getToken(data) {
-      if (data) {
-        let headers = {};
-        headers.token = data["token"];
-        // alert(headers.token);
-        headers.user_agent = JSON.parse(decodeURIComponent(data["user_agent"]));
-        let headStr =
-          '{"user_agent":"Version:' +
-          headers.user_agent.Version +
-          ":Device:" +
-          headers.user_agent.Device +
-          ":Type:" +
-          headers.user_agent.Type +
-          '","token":"' +
-          data["token"] +
-          '","originUrl":"' +
-          data["originUrl"] + 
-          '"}';
+    // console.log(1);
+    // function getToken(data) {
+    //   if (data) {
+    //     let headers = {};
+    //     headers.token = data["token"];
+    //     // alert(headers.token);
+    //     headers.user_agent = JSON.parse(decodeURIComponent(data["user_agent"]));
+    //     let headStr =
+    //       '{"user_agent":"Version:' +
+    //       headers.user_agent.Version +
+    //       ":Device:" +
+    //       headers.user_agent.Device +
+    //       ":Type:" +
+    //       headers.user_agent.Type +
+    //       '","token":"' +
+    //       data["token"] +
+    //       '","originUrl":"' +
+    //       data["originUrl"] + 
+    //       '"}';
 
-        window.localStorage.setItem("header", headStr);
-        // window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}')
-      }
-    }
+    //     window.localStorage.setItem("header", headStr);
+    //     alert(headStr);
+    //     alert(window.location.href);
+    //     // window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}')
+    //   }
+    // }
     // window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"30509434312593408"}')
     function GetRequest() {
       let url = window.location.search ? window.location.search : window.location.hash; //获取url中"?"符后的字串 
@@ -50,15 +52,15 @@
       }
       return theRequest;
     }
-    if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1) {
+    // if (navigator.userAgent.indexOf("Android") > -1 || navigator.userAgent.indexOf("Adr") > -1) {
       let obj = {
-        token: GetRequest().token,
-        user_agent: GetRequest().user_agent,
-        originUrl:GetRequest().originUrl
+        token: GetRequest().token||'',
+        user_agent: GetRequest().user_agent||'',
+        originUrl:GetRequest().originUrl||''
       }
       window.localStorage.setItem("header", JSON.stringify(obj));
-    }
-    window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"99988344036921344"}')
+    // }
+    // window.localStorage.setItem('header','{"user_agent":"ANDROID:0.0.0.1:Redmi4A:Xiaomi:23:F38157B473ECE0F6F2C5F503EFD2874F","token":"105792333735268352"}')
   </script>
 </head>
 

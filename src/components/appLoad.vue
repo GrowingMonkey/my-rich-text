@@ -803,18 +803,15 @@ export default {
     },
     //定义方法上传第三方图片//获取src第三方地址
     isHaveOtherImg() {
-      let str = this.detail;
+      let str = this.text;
       let regTag = new RegExp(/<img\b.*?(?:>|\/>)/gi);
       let regSrc = new RegExp(/\s+\bsrc="([^"]*)"/g);
-      let arrImg = str.match(regTag);
-      let arrSrc = str.match(regSrc);
-      let arrImgAll = str.match(regTag);
+      let arrImgAll = str.match(regTag)||[];
       let arrImgUpload = []; //第三方img标签
       let arrSrcUpload = []; //第三方src
       for (let i = 0; i < arrImgAll.length; i++) {
         let domObj = document.createElement("div");
         domObj.innerHTML = arrImgAll[i];
-        console.log(domObj.childNodes);
         if (
           !domObj.childNodes[0].hasAttribute("name") &&
           domObj.childNodes[0].getAttribute("name") != "oneupload"
@@ -823,18 +820,15 @@ export default {
           arrImgUpload.push(arrImgAll[i]);
         }
       }
-      if (arrImgUpload) {
-        for (item of arrImgUpload) {
-          let url = item
-            .match(regSrc)[0]
-            .split("src=")[1]
-            .replace(/'|"/g, "");
+      if(arrImgUpload) {
+        for(let item of arrImgUpload) {
+          let url = item.match(regSrc)[0].split("src=")[1].replace(/'|"/g, "");
           arrSrcUpload.push(url);
         }
       }
       return arrSrcUpload;
     },
-    getBase64() {
+    getBase64(img) {
       return new Promise((resolve, reject) => {
         function getBase64Image(img, width, height) {
           //width、height调用时传入具体像素值，控制大小 ,不传则默认图像大小
@@ -891,7 +885,7 @@ export default {
       }
       this.isDisable = val;
       if (type == 1) {
-        let arrSrcUpload = this.isHaveOtherImg();
+        let arrSrcUpload = that.isHaveOtherImg();
         for (let i = 0; i < arrSrcUpload.length; i++) {
           let currentUrl = arrSrcUpload[i];
           let currentFile = {};
@@ -911,15 +905,9 @@ export default {
             fileName,
             currentFile.file
           );
-          // .then(function (result) {
-          //     // var url = result.res.requestUrls[0];
-          //     // var length = url.lastIndexOf('?');
-          //     // var imgUrl = length > 0 ? url.substr(0, length) : url; // 文件最终路径
-          //     console.log(result);
-          // }).catch(function (err) {
-          //     console.log(err);
-          // });
-          console.log(resut);
+          if(resut.res.status==200&&resut.name){
+            that.text=that.text.replace(currentUrl,`${VUE_APP_CDN}/${resut.name}`);
+          }
         }
       }
       let commit_url = "/art/commit";
@@ -983,14 +971,13 @@ export default {
           if (window.localStorage.getItem("draft_id") && type == 3) {
             data.id = that.draftId || window.localStorage.getItem("draft_id");
           }
-          that
-            .$post(
+          console.log(data);
+          that.$post(
               `${that.originUrl}/${
                 NODE_ENV == "aiyu" ? "api" : "api"
               }/upload${commit_url}`,
               data
-            )
-            .then(Response => {
+            ).then(Response => {
               if (Response.code == 0 && type == 1) {
                 window.localStorage.setItem("publishId", "");
                 window.localStorage.removeItem("draft_id");

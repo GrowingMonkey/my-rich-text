@@ -63,7 +63,7 @@ const {
   VUE_APP_DIR_VIDEO
 } = configuration;
 
-import { Toast } from "vant";
+import { Toast, Dialog } from "vant";
 export default {
   name: "editDiv",
   props: {
@@ -346,7 +346,10 @@ export default {
         ); //png
          if (that.positionImg == "videoContent") {
           if(fileFormat!='mp4'){
-            alert('只能上传mp4格式视频');
+            Dialog.alert({
+            title: "上传错误",
+            message:'只能上传mp4格式视频'
+          });
             this.allToast.clear();
             return;
           }
@@ -377,9 +380,15 @@ export default {
       let res = await that.getSourceStatus(url);
       let time = await that.getTimeStatus();
       if (res.source) {
-        alert("转码成功");
+        Dialog.alert({
+            title: "提示",
+            message:'转码成功'
+          });
       } else {
-        alert('正在转码中,请稍后重试');
+         Dialog.alert({
+            title: "提示",
+            message:'正在转码中，请稍后重试'
+          });
         if (time.timeStatus) {
           that.getResult(url);
         }
@@ -447,7 +456,10 @@ export default {
           })
           .catch(function(err) {
             that.errAction();
-            alert("网络有点延迟,请稍后重试");
+             Dialog.alert({
+            title: "提示",
+            message:'网络有点延迟,请稍后重试'
+          });
             console.log(err);
           });
       } else {
@@ -477,8 +489,8 @@ export default {
                 //插入成功上传的文件
                 if (v && that.positionImg == "imgContent") {
                   that.execCommand(
-                    "insertimage",
-                    `${VUE_APP_CDN}/${that.newFileNameArrays[i]}`
+                    "insertHTML",
+                    that.imgHtml(`${VUE_APP_CDN}/${that.newFileNameArrays[i]}`)
                   );
                 } else {
                   console.log(that.newFileNameArrays[i]);
@@ -491,7 +503,10 @@ export default {
             }
           })
           .catch(function(err) {
-            alert("网络有点延迟,请稍后重试");
+             Dialog.alert({
+            title: "提示",
+            message:'网络有点延迟,请稍后重试'
+          });
             that.errAction();
             console.log(err);
             that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
@@ -501,6 +516,9 @@ export default {
     errAction() {
       console.log(1111111111);
       // this.allToast&&this.allToast.clear();
+    },
+    imgHtml(val){
+      return `<img src="${val}" name="oneupload" />`;
     },
     videoHtml(val) {
       this.allToast.message = "上传完成";
