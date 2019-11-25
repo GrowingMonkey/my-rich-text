@@ -30,7 +30,7 @@
         </div>
         <div class="btn-box save">
           <button class="up-btn video-btn" @click="uploadVideo">
-            <input type="file" @change="onFileChange2" name="videoContent" ref="uploadinputVideo" />
+            <input type="file" accept="video/*" @change="onFileChange2" name="videoContent" ref="uploadinputVideo" />
           </button>
         </div>
         <button class="btn-draft" @click.stop.prevent="clearCaogao">
@@ -345,10 +345,10 @@ export default {
           fileNameLength
         ); //png
          if (that.positionImg == "videoContent") {
-          if(fileFormat!='mp4'){
+          if(fileFormat!='mp4'||fileFormat!='mov'||fileFormat!='m4v'||fileFormat!='m4a'){
             Dialog.alert({
             title: "上传错误",
-            message:'只能上传mp4格式视频'
+            message:'只能上传视频格式'
           });
             this.allToast.clear();
             return;
