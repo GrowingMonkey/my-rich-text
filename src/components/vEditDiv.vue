@@ -18,21 +18,14 @@
       <div class="action-box">
         <div class="btn-box">
           <button class="up-btn" @click="uploadImg">
-            <input
-              type="file"
-              accept="image/*"
-              @change="onFileChange2"
-              name="imgContent"
-              ref="uploadinput"
-              multiple
-            />
+            <input type="file" @change="onFileChange2" name="imgContent" ref="uploadinput" multiple />
           </button>
         </div>
-        <div class="btn-box save">
+        <!-- <div class="btn-box save">
           <button class="up-btn video-btn" @click="uploadVideo">
             <input type="file" accept="video/*" @change="onFileChange2" name="videoContent" ref="uploadinputVideo" />
           </button>
-        </div>
+        </div>-->
         <button class="btn-draft" @click.stop.prevent="clearCaogao">
           <i class="save"></i>
         </button>
@@ -115,7 +108,9 @@ export default {
     async getSTStoken() {
       let that = this;
       return await this.$post(
-        `${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`
+        `${that.originUrl}/${
+          NODE_ENV == "aiyu" ? "api" : "api"
+        }/upload/pic/getSTSToken`
       ).then(res => {
         if (res && res.code != 0) {
           Toast(res.message);
@@ -236,7 +231,10 @@ export default {
       let that = this;
       return new Promise((reject, resolve) => {
         if (!window.localStorage.getItem("publishId")) {
-          this.$post(that.originUrl + `/${NODE_ENV=='aiyu'?'api':'api'}/upload/art/publish`).then(res => {
+          this.$post(
+            that.originUrl +
+              `/${NODE_ENV == "aiyu" ? "api" : "api"}/upload/art/publish`
+          ).then(res => {
             if (res && res.code == 0) {
               window.localStorage.setItem("publishId", res.data.id);
               reject(res);
@@ -257,7 +255,11 @@ export default {
     },
     getOssKey() {
       let that = this;
-      return that.$post(`${that.originUrl}/${NODE_ENV=='aiyu'?'api':'api'}/upload/pic/getSTSToken`);
+      return that.$post(
+        `${that.originUrl}/${
+          NODE_ENV == "aiyu" ? "api" : "api"
+        }/upload/pic/getSTSToken`
+      );
     },
     convertToBlob(base64Str, fileType) {
       var base64 = window.atob(base64Str);
@@ -344,22 +346,23 @@ export default {
           temporary + 1,
           fileNameLength
         ); //png
-         if (that.positionImg == "videoContent") {
-          if(fileFormat!='mp4'){
-            Dialog.alert({
+        let imgStr = /\.(jpg|jpeg|png|bmp|mov|mp4|BMP|JPG|PNG|JPEG|MOV|MP4)$/;
+        if (
+          !imgStr.test(`.${fileFormat}`)
+        ) {
+          Dialog.alert({
             title: "上传错误",
-            message:'只能上传视频格式'
+            message: "只能上传视频和图片"
           });
-            this.allToast.clear();
-            return;
-          }
+          this.allToast.clear();
+          return;
         }
         //上传的文件名
         let newFileName = `${that.uuid()}.${fileFormat}`;
-        if (that.positionImg == "imgContent") {
-          that.newFileNameArrays.push(`${VUE_APP_DIR_IMG}${newFileName}`);
+        if (!imgStr.test(fileFormat)) {
+          that.newFileNameArrays.push(`${VUE_APP_DIR_IMG}${newFileName}`); //图片
         } else {
-          that.newFileNameArrays.push(`${VUE_APP_DIR_VIDEO}${newFileName}`);
+          that.newFileNameArrays.push(`${VUE_APP_DIR_VIDEO}${newFileName}`); //视频
         }
         // console.log(that.newFileNameArrays);
         that.multipartUploadWithSts(
@@ -381,14 +384,14 @@ export default {
       let time = await that.getTimeStatus();
       if (res.source) {
         Dialog.alert({
-            title: "提示",
-            message:'转码成功'
-          });
+          title: "提示",
+          message: "转码成功"
+        });
       } else {
-         Dialog.alert({
-            title: "提示",
-            message:'正在转码中，请稍后重试'
-          });
+        Dialog.alert({
+          title: "提示",
+          message: "正在转码中，请稍后重试"
+        });
         if (time.timeStatus) {
           that.getResult(url);
         }
@@ -408,18 +411,22 @@ export default {
         request.open("GEt", url), true;
         request.send();
         request.onreadystatechange = function() {
-          console.log(request.status,request.readyState);
+          console.log(request.status, request.readyState);
           if (request.status == 404) {
             resolve({ source: false });
           } else {
-           resolve({ source: true });
+            resolve({ source: true });
           }
         };
       });
     },
     multipartUploadWithSts(storeAs, file, cpt) {
       let that = this;
-      if (that.positionImg == "imgContent") {
+      let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
+      let temporary = file.name.lastIndexOf(".");
+      let fileNameLength = file.name.length;
+      let fileFormat = file.name.substring(temporary + 1, fileNameLength); //png
+      if (!imgStr.test(fileFormat)) {
         that.multitest(that.clientOss, storeAs, file, cpt);
       } else {
         that.multitest(that.clientOssV, storeAs, file, cpt);
@@ -456,10 +463,10 @@ export default {
           })
           .catch(function(err) {
             that.errAction();
-             Dialog.alert({
-            title: "提示",
-            message:'网络有点延迟,请稍后重试'
-          });
+            Dialog.alert({
+              title: "提示",
+              message: "网络有点延迟,请稍后重试"
+            });
             console.log(err);
           });
       } else {
@@ -488,25 +495,43 @@ export default {
               that.fileSuccStatus.map((v, i) => {
                 //插入成功上传的文件
                 if (v && that.positionImg == "imgContent") {
-                  that.execCommand(
-                    "insertHTML",
-                    that.imgHtml(`${VUE_APP_CDN}/${that.newFileNameArrays[i]}`)
-                  );
-                } else {
                   console.log(that.newFileNameArrays[i]);
-                  that.execCommand(
-                    "insertHTML",
-                    that.videoHtml(that.newFileNameArrays[i])
+                  let fileName = that.newFileNameArrays[i].lastIndexOf(".");
+                  let fileNameLength = that.newFileNameArrays[i].length;
+                  let fileFormat = that.newFileNameArrays[i].substring(
+                    fileName + 1,
+                    fileNameLength
                   );
+                  let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
+                  if (!imgStr.test(`.${fileFormat}`)) {
+                    that.execCommand(
+                      "insertHTML",
+                      that.videoHtml(that.newFileNameArrays[i])
+                    );
+                  } else {
+                    that.execCommand(
+                      "insertHTML",
+                      that.imgHtml(
+                        `${VUE_APP_CDN}/${that.newFileNameArrays[i]}`
+                      )
+                    );
+                  }
                 }
+                //  else {
+                //   console.log(that.newFileNameArrays[i]);
+                //   that.execCommand(
+                //     "insertHTML",
+                //     that.videoHtml(that.newFileNameArrays[i])
+                //   );
+                // }
               });
             }
           })
           .catch(function(err) {
-             Dialog.alert({
-            title: "提示",
-            message:'网络有点延迟,请稍后重试'
-          });
+            Dialog.alert({
+              title: "提示",
+              message: "网络有点延迟,请稍后重试"
+            });
             that.errAction();
             console.log(err);
             that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
@@ -517,16 +542,13 @@ export default {
       console.log(1111111111);
       // this.allToast&&this.allToast.clear();
     },
-    imgHtml(val){
+    imgHtml(val) {
       return `<img src="${val}" name="oneupload" />`;
     },
     videoHtml(val) {
       this.allToast.message = "上传完成";
       this.allToast.clear();
-      this.videoUrl = `${VUE_APP_CDN}/${val.replace(
-        "input",
-        "output"
-      )}`;
+      this.videoUrl = `${VUE_APP_CDN}/${val.replace("input", "output")}`;
       return `<p><video class="edit-video" src="${VUE_APP_CDN}/${val.replace(
         "input",
         "output"
@@ -689,7 +711,7 @@ export default {
   mounted() {
     this.innerText = this.value;
     let that = this;
-    this.originUrl =VUE_APP_BASEURL;
+    this.originUrl = VUE_APP_BASEURL;
     //    this.originUrl =
     // window.location.origin.indexOf("www") > -1
     //   ? "http://www.aiyu2019.com/api"
@@ -707,7 +729,7 @@ export default {
         accessKeySecret: store.accessKeySecret,
         stsToken: store.securityToken,
         endpoint: VUE_APP_ENDPOINT,
-        bucket:VUE_APP_BUCKET2
+        bucket: VUE_APP_BUCKET2
       });
     });
     this.getSTStoken().then(res => {
