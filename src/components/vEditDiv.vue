@@ -345,7 +345,7 @@ export default {
           fileNameLength
         ); //png
          if (that.positionImg == "videoContent") {
-          if(fileFormat!='mp4'||fileFormat!='mov'||fileFormat!='m4v'||fileFormat!='m4a'){
+          if(fileFormat!='mp4'){
             Dialog.alert({
             title: "上传错误",
             message:'只能上传视频格式'

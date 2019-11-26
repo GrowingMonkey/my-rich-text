@@ -204,7 +204,6 @@ export default {
       let time = signatureObj.expiration;
       let that = this;
       let body = signatureObj;
-      console.log(body);
       let host = "https://f-bd.imuguang.com";
       // let host = "https://aiyu-out.oss-cn-hongkong.aliyuncs.com";//艾鱼
       let policyText = {
@@ -527,27 +526,27 @@ export default {
             parallel: 2,
             checkpoint: cpt,
             progress: function*(percent, cpt) {
-              console.log("Progress: " + percent);
+              
               checkpoint_temp = cpt;
             }
           })
           .then(function(result) {
-            console.log(result);
+            
             if (result) {
               if (that.positionImg == "cover") {
                 that.firstUp = false;
                 that.coverUrl = result.name;
               }
-              console.log(result.name);
+              
               // that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
             }
           })
           .catch(function(err) {
-            console.log(err);
+            
             // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
           });
       } else {
-        console.log("multitest without cpt");
+       
         ossClient
           .multipartUpload(storeAs, file, {
             parallel: 2,
@@ -567,7 +566,6 @@ export default {
             //  that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
           })
           .catch(function(err) {
-            console.log(err);
             // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
           });
       }
@@ -803,28 +801,26 @@ export default {
     },
     //定义方法上传第三方图片//获取src第三方地址
     isHaveOtherImg() {
-      let str = this.detail;
+      let str = this.text;
       let regTag = new RegExp(/<img\b.*?(?:>|\/>)/gi);
       let regSrc = new RegExp(/\s+\bsrc="([^"]*)"/g);
-      let arrImg = str.match(regTag);
-      let arrSrc = str.match(regSrc);
-      let arrImgAll = str.match(regTag);
+      let arrImgAll = str.match(regTag) || [];
       let arrImgUpload = []; //第三方img标签
       let arrSrcUpload = []; //第三方src
       for (let i = 0; i < arrImgAll.length; i++) {
         let domObj = document.createElement("div");
         domObj.innerHTML = arrImgAll[i];
-        console.log(domObj.childNodes);
+     
         if (
           !domObj.childNodes[0].hasAttribute("name") &&
           domObj.childNodes[0].getAttribute("name") != "oneupload"
         ) {
-          console.log("没有"); //第三方
+          //第三方
           arrImgUpload.push(arrImgAll[i]);
         }
       }
       if (arrImgUpload) {
-        for (item of arrImgUpload) {
+        for (let item of arrImgUpload) {
           let url = item
             .match(regSrc)[0]
             .split("src=")[1]
@@ -834,7 +830,7 @@ export default {
       }
       return arrSrcUpload;
     },
-    getBase64() {
+    getBase64(img) {
       return new Promise((resolve, reject) => {
         function getBase64Image(img, width, height) {
           //width、height调用时传入具体像素值，控制大小 ,不传则默认图像大小
@@ -848,11 +844,14 @@ export default {
           return dataURL;
         }
         var image = new Image();
-        image.crossOrigin = "";
-        image.src = img;
+        image.crossOrigin = "anonymous";
+        image.src = `${img}?${new Date().getTime()}`;
         if (img) {
           image.onload = function() {
             resolve(getBase64Image(image)); //将base64传给done上传处理
+          };
+          image.onerror = function(err) {
+            resolve({ failstatus: true });
           };
           // return deferred.promise();
         }
@@ -884,6 +883,13 @@ export default {
     // //定义app调用的方法
     async submitForm(val, type) {
       let that = this;
+      type == 1 &&
+        Toast.loading({
+          duration: 3000, // 持续展示 toast
+          forbidClick: true, // 禁用背景点击
+          loadingType: "spinner",
+          message: "发布中"
+        });
       console.log(type);
       if (type == "clear") {
         this.clearMethod();
@@ -891,7 +897,7 @@ export default {
       }
       this.isDisable = val;
       if (type == 1) {
-        let arrSrcUpload = this.isHaveOtherImg();
+        let arrSrcUpload = this.isHaveOtherImg() || [];
         for (let i = 0; i < arrSrcUpload.length; i++) {
           let currentUrl = arrSrcUpload[i];
           let currentFile = {};
@@ -902,15 +908,22 @@ export default {
             currentUrl.split("?")[0].split("/").length - 1
           ];
           let base64 = await that.getBase64(currentUrl);
-          let bolbFile = that.dataURLtoBlob(base64);
-          currentFile.file = that.blobToFile(bolbFile, currentFile.fileName);
-          let fileName = `others/${currentFile.fileName}`;
-          console.log("文件名:" + fileName);
-          // multipartUploadWithSts(clientOss,`img/${new Date().getTime()}.jpg`,fileDate);
-          let resut = await that.clientOss.multipartUpload(
-            fileName,
-            currentFile.file
-          );
+          if (base64 &&base64.failstatus) {
+            continue;
+          }
+           let bolbFile = that.dataURLtoBlob(base64);
+            currentFile.file = that.blobToFile(bolbFile, currentFile.fileName);
+            let fileName = `others/${currentFile.fileName}`;
+            console.log("文件名:" + fileName);
+            // multipartUploadWithSts(clientOss,`img/${new Date().getTime()}.jpg`,fileDate);
+            let resut = await that.clientOss.multipartUpload(
+              fileName,
+              currentFile.file
+            );
+            if (resut && resut.name) {
+              console.log(resut)
+              that.text=that.text.replace(currentUrl, `${VUE_APP_CDN}/${resut.name}`);
+            }
           // .then(function (result) {
           //     // var url = result.res.requestUrls[0];
           //     // var length = url.lastIndexOf('?');
@@ -919,7 +932,6 @@ export default {
           // }).catch(function (err) {
           //     console.log(err);
           // });
-          console.log(resut);
         }
       }
       let commit_url = "/art/commit";
@@ -956,13 +968,6 @@ export default {
             that.isDisable = false;
             return;
           }
-          type == 1 &&
-            Toast.loading({
-              duration: 3000, // 持续展示 toast
-              forbidClick: true, // 禁用背景点击
-              loadingType: "spinner",
-              message: "发布中"
-            });
           let data = {
             bgpUrl:
               that.coverUrl && that.coverUrl !== ""
