@@ -390,10 +390,10 @@ export default {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  margin: 0 24px;
+  margin: 24px 24px;
   border:none;
 }
 .edit-tool .right .active{
-  border:1px solid #c8c8c8;
+  border:4px solid #c8c8c8;
 }
 </style>

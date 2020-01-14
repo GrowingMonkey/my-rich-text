@@ -45,7 +45,10 @@ export async function upload(file,callback) {
   });
   //设置oss对象
   setOssClient(clientOss);
-  let fileName=callbackObj&&callbackObj.fileName?callbackObj.fileName:file.name;//在callback获取文件名
+  let temporary = file.name.lastIndexOf(".");
+  let fileNameLength = file.name.length;
+  let fileFormat = file.name.substring(temporary + 1, fileNameLength); //png
+  let fileName=callbackObj&&callbackObj.fileName?callbackObj.fileName+'.'+fileFormat:file.name;//在callback获取文件名
   return new Promise((resolve,reject)=>{
     multipartUploadWithSts(fileName, file).then(res=>{
         resolve(res);

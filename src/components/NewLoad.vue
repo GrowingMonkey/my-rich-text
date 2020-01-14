@@ -62,7 +62,7 @@
             <span>{{v.content}}</span>
           </div>
           <img :src="v.content" alt v-if="v.type==2" @click="ImgChange(i)" />
-          <div class="index">{{i>=100?`${i+1}`:`${i+1}&nbsp;`}}</div>
+          <div class="index" style="font-size: 12px;">{{i>=100?`${i+1}`:`${i+1}&nbsp;`}}</div>
         </div>
       </div>
     </div>
@@ -123,10 +123,10 @@ export default {
       //单张上传
       let result = await upload(e.target.files[0], this.getBucket);
       let {
-        res: { requestUrls }
+        name,res: { requestUrls }
       } = result;
       let url = requestUrls[0];
-      this.cover = url;
+      this.cover = `${VUE_APP_CDN}/${name}`;
     },
     ImgChange(i) {
       console.log(i);
@@ -159,10 +159,25 @@ export default {
       this.insertPic(url);
     },
     getBucket() {
+      let that=this;
       return {
         VUE_APP_ENDPOINT: VUE_APP_ENDPOINT,
-        VUE_APP_BUCKET: VUE_APP_BUCKET2
+        VUE_APP_BUCKET: VUE_APP_BUCKET2,
+        fileName:that.getFileName()
       };
+    },
+    getFileName(){
+      let s = [];
+      let hexDigits = "56789abcdefghijk";
+      for (let i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+      }
+      s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      s[8] = s[13] = s[18] = s[23] = "-";
+      let uuid = s.join("");
+      uuid = uuid.replace(/[-]/g, "");
+      return uuid;
     },
     jumpDrag() {
       this.$router.push("/moduledrag");
@@ -351,7 +366,6 @@ export default {
   height: 123px;
   border-radius: 10px;
   background: url("../../static/index.png") no-repeat;
-  font-size: 12px;
   text-align: right;
   padding-right: 10px;
   padding-top: 10px;
