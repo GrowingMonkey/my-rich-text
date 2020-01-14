@@ -344,7 +344,7 @@ export default {
           temporary + 1,
           fileNameLength
         ); //png
-         if (that.positionImg == "videoContent") {
+         if (that.positionImg == "videoContent"){
           if(fileFormat!='mp4'){
             Dialog.alert({
             title: "上传错误",

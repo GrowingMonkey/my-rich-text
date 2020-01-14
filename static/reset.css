@@ -102,7 +102,12 @@ nav,
 section {
   display: block;
 }
-
+.content-edit i{
+  font-style: italic !important;
+}
+.content-edit b{
+  font-weight: bold !important;
+}
 body {
   line-height: 1;
 }

@@ -19,8 +19,15 @@
         <div class="upload-action">
           <div class="left">
             <div class="btn-box">
-              <button class="up-btn" @click="insertPic">
-                <input type="file" accept="image/*" name="imgContent" ref="uploadinput" multiple />
+              <button class="up-btn" @click="uploadImg">
+                <input
+                  type="file"
+                  accept="image/*"
+                  name="imgContent"
+                  ref="uploadinput"
+                  @change="onFileChangeImg"
+                  multiple
+                />
               </button>
             </div>
             <div class="btn-box save">
@@ -44,21 +51,22 @@
       <h1 class="tip">点击模块编辑内容</h1>
       <div class="upload-module" ref="moduleContainer">
         <div class="module-container">
-          <div class="cover" @click="uploadImg">
+          <div class="cover" @click="upLoadCover">
             <h1 v-if="cover==''">添加封面</h1>
-            <input type="file" ref="uploadcover" @click="onFileChange2" v-if="cover==''" />
             <img :src="`${cover}?x-oss-process=image/resize,w_200,h_200,m_fill`" v-else />
+            <input type="file" ref="uploadcover" @change="onFileChange" />
           </div>
         </div>
         <div class="module-container" v-for="(v,i) in moduleList" :key="i">
-          <div v-if="v.type==1" class="text-info">
+          <div v-if="v.type==1" class="text-info" @click="jumpEdit">
             <span>{{v.content}}</span>
           </div>
-          <img :src="v.content" alt v-if="v.type==2" />
+          <img :src="v.content" alt v-if="v.type==2" @click="ImgChange(i)" />
           <div class="index">{{i>=100?`${i+1}`:`${i+1}&nbsp;`}}</div>
         </div>
       </div>
     </div>
+    <input type="file" ref="allImgChange" @change="onImgChange" />
     <footer>
       <span class="scan">预览</span>
       <span class="send">发布</span>
@@ -67,41 +75,100 @@
 </template>
 
 <script>
+import configuration from "../utils/utils";
+const {
+  NODE_ENV,
+  VUE_APP_CLOSE,
+  VUE_APP_BASEURL,
+  VUE_APP_OSSADDRESS,
+  VUE_APP_VIDEO,
+  VUE_APP_CDN,
+  VUE_APP_ENDPOINT,
+  VUE_APP_BUCKET1,
+  VUE_APP_BUCKET2,
+  VUE_APP_DIR_IMG,
+  VUE_APP_DIR_VIDEO
+} = configuration;
+import { upload } from "../../static/lib/upload";
 export default {
   name: "NewLoad",
   data() {
     return {
       msg: "Welcome to Your Vue.js App",
       cover: "",
+      articleTitle: "",
       duanluo: {
         type: 1,
         title: "",
         content: ""
       },
-      moduleList: [
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 },
-        { content: "大实打实实打实的实打实的大声点", title: "十大", type: 1 }
-      ]
+      moduleList: [],
+      currentIndex: 0
     };
   },
   mounted() {},
   methods: {
-    uploadImg() {
-      this.cover =
-        "https://f-bd.imuguang.com/wh/static/img/send_video_icon.png";
+    uploadImg(e) {
+      this.$refs.uploadinput.click();
+    },
+    upLoadCover(e) {
       this.$refs.uploadcover.click();
     },
-    onFileChange2() {},
+    //封面上传
+    async onFileChange(e) {
+      console.log(e);
+      if (e.target.files.length == 0) {
+        return;
+      }
+      //单张上传
+      let result = await upload(e.target.files[0], this.getBucket);
+      let {
+        res: { requestUrls }
+      } = result;
+      let url = requestUrls[0];
+      this.cover = url;
+    },
+    ImgChange(i) {
+      console.log(i);
+      this.currentIndex = i;
+      this.$refs.allImgChange.click();
+    },
+    async onImgChange(e) {
+      if (e.target.files.length == 0) {
+        return;
+      }
+      //单张上传
+      let result = await upload(e.target.files[0], this.getBucket);
+      let {
+        res: { requestUrls }
+      } = result;
+      let url = requestUrls[0];
+      this.moduleList[this.currentIndex].content = url;
+    },
+    //图片上传
+    async onFileChangeImg(e) {
+      if (e.target.files.length == 0) {
+        return;
+      }
+      //单张上传
+      let result = await upload(e.target.files[0], this.getBucket);
+      let {
+        res: { requestUrls }
+      } = result;
+      let url = requestUrls[0];
+      this.insertPic(url);
+    },
+    getBucket() {
+      return {
+        VUE_APP_ENDPOINT: VUE_APP_ENDPOINT,
+        VUE_APP_BUCKET: VUE_APP_BUCKET2
+      };
+    },
     jumpDrag() {
       this.$router.push("/moduledrag");
+    },
+    jumpEdit() {
+      this.$router.push("/edit");
     },
     saveModule() {
       let that = this;
@@ -109,14 +176,31 @@ export default {
       this.moduleList.push(currentObj);
       this.duanluo.title = "";
       this.duanluo.content = "";
+      this.$refs.moduleContainer.scrollTop = this.$refs.moduleContainer.scrollHeight;
     },
-    insertPic() {
+    insertPic(val) {
       this.moduleList.push({
         type: 2,
-        content: "https://f-bd.imuguang.com/wh/static/img/send_video_icon.png"
+        content: val
       });
       //添加元素时使滚动跳滚动到底部
-      this.$refs.moduleContainer.scrollTop=this.$refs.moduleContainer.scrollHeight;
+      this.$refs.moduleContainer.scrollTop = this.$refs.moduleContainer.scrollHeight;
+    },
+    insertVideo() {
+      this.moduleList.push({
+        type: 3,
+        content: ""
+      });
+      this.$refs.moduleContainer.scrollTop = this.$refs.moduleContainer.scrollHeight;
+    }
+  },
+  watch: {
+    'moduleList': {
+      handler: function(newValue, oldValue) {
+        console.log(newValue);
+        window.localStorage.setItem('moduleList',JSON.stringify(newValue));
+      },
+      deep: true
     }
   }
 };
@@ -125,9 +209,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .upload-container .tip {
-    margin-left: 58px;
-    margin-top: 40px;
-    margin-bottom: 40px;
+  margin-left: 58px;
+  margin-top: 40px;
+  margin-bottom: 40px;
   font-size: 38px;
   color: rgba(184, 184, 184, 1);
   line-height: 53px;
@@ -164,6 +248,7 @@ export default {
   width: 100%;
   font-size: 52px;
   font-weight: 600;
+  border: none;
 }
 .upload-duanluo {
   width: 100%;
@@ -178,6 +263,25 @@ export default {
 }
 .upload-duanluo .upload-duanluo-title input {
   font-size: 42px;
+  border: none;
+}
+::-webkit-input-placeholder {
+  color: #bbb;
+  padding-top: 0.16rem;
+}
+:-moz-placeholder {
+  color: #bbb;
+  padding-top: 0.16rem;
+}
+/* Firefox版本19+ */
+::-moz-placeholder {
+  color: #bbb;
+  padding-top: 0.16rem;
+}
+/* IE浏览器 */
+:-ms-input-placeholder {
+  color: #bbb;
+  padding-top: 0.16rem;
 }
 .upload-duanluo .upload-duanluo-content {
   box-sizing: border-box;
@@ -189,6 +293,7 @@ export default {
 .upload-duanluo .upload-duanluo-content textarea {
   width: 100%;
   box-sizing: border-box;
+  border: none;
 }
 .upload-duanluo .upload-duanluo-content .upload-action {
   display: flex;
