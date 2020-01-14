@@ -12,98 +12,139 @@
     </div>
     <div
       v-html="htmlObj.content"
-      spellcheck=false
+      spellcheck="false"
       class="content-edit"
       contenteditable="true"
       @input="editChange"
       ref="editor"
-      @paste="pasteText"      
+      @paste="pasteText"
     >
       <!-- <p>{{htmlObj.content}}</p> -->
     </div>
     <!-- <new-edit></new-edit> -->
     <div class="edit-tool">
       <div class="left">
-        <input class="bold" :class="{ active: iconList[0].choose }" value="B" type="button" @click="iconClick($event, 'bold', 'style')"/>
-        <input class="bias" :class="{ active: iconList[1].choose }" value="I" type="button" @click="iconClick($event, 'italic', 'style')"/>
-        <input class="underline" :class="{ active: iconList[2].choose }" value="U" type="button" @click="iconClick($event, 'underline', 'style')"/>
+        <input
+          class="bold"
+          :class="{ active: iconList[0].choose }"
+          value="B"
+          type="button"
+          @click="iconClick($event, 'bold', 'style')"
+        />
+        <input
+          class="bias"
+          :class="{ active: iconList[1].choose }"
+          value="I"
+          type="button"
+          @click="iconClick($event, 'italic', 'style')"
+        />
+        <input
+          class="underline"
+          :class="{ active: iconList[2].choose }"
+          value="U"
+          type="button"
+          @click="iconClick($event, 'underline', 'style')"
+        />
       </div>
       <div class="right">
         <div style="border-radius:50%">
-        <button style="background:rgba(110,110,110,1);" :class="{ active: iconList[3].choose }" @click="iconClick($event, 'foreColor1', 'style')"></button></div>
-        <div style="border-radius:50%"><button style="background:rgba(241,89,108,1);"  :class="{ active: iconList[4].choose }" @click="iconClick($event, 'foreColor2', 'style')"></button></div>
-        <div style="border-radius:50%"><button style="background:rgba(241,223,3,1);"  :class="{ active: iconList[5].choose }" @click="iconClick($event, 'foreColor3', 'style')"></button></div>
-        <div style="border-radius:50%"><button style="background:rgba(80,227,194,1);" :class="{ active: iconList[6].choose }" @click="iconClick($event, 'foreColor4', 'style')"></button></div>
+          <button
+            style="background:rgba(110,110,110,1);"
+            :class="{ active: iconList[3].choose }"
+            @click="iconClick($event, 'foreColor1', 'style')"
+          ></button>
+        </div>
+        <div style="border-radius:50%">
+          <button
+            style="background:rgba(241,89,108,1);"
+            :class="{ active: iconList[4].choose }"
+            @click="iconClick($event, 'foreColor2', 'style')"
+          ></button>
+        </div>
+        <div style="border-radius:50%">
+          <button
+            style="background:rgba(241,223,3,1);"
+            :class="{ active: iconList[5].choose }"
+            @click="iconClick($event, 'foreColor3', 'style')"
+          ></button>
+        </div>
+        <div style="border-radius:50%">
+          <button
+            style="background:rgba(80,227,194,1);"
+            :class="{ active: iconList[6].choose }"
+            @click="iconClick($event, 'foreColor4', 'style')"
+          ></button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import NewEdit from './NewEdit'
+import NewEdit from "./NewEdit";
 export default {
   name: "EditModule",
-  components:{
-    NewEdit,
+  components: {
+    NewEdit
   },
   data() {
     return {
-      innerText:'',
+      innerText: "",
       htmlObj: {
         title: "",
         content: ""
       },
-      selectedRange: '',
+      selectedRange: "",
       iconList: [
         {
           // hover名字
-          name: '粗体',
+          name: "粗体",
           // 点击事件处理
-          type: 'bold',
+          type: "bold",
           // 是否被选中
           canChoose: true,
           choose: false
         },
         {
-          name: '斜体',
-          type: 'italic',
+          name: "斜体",
+          type: "italic",
           canChoose: true,
           choose: false
         },
         {
-          name: '下划线',
-          type: 'underline',
+          name: "下划线",
+          type: "underline",
           canChoose: true,
           choose: false
         },
         {
-          name: '字体颜色',
-          type: 'foreColor1',
+          name: "字体颜色",
+          type: "foreColor1",
           canChoose: true,
-          drop:true,
+          drop: true,
           choose: false
         },
         {
-          name: '字体颜色',
-          type: 'foreColor2',
-          drop:true,
-          canChoose: true,
-          choose: false
-        },
-        {
-          name: '字体颜色',
-          type: 'foreColor3',
-          drop:true,
+          name: "字体颜色",
+          type: "foreColor2",
+          drop: true,
           canChoose: true,
           choose: false
         },
         {
-          name: '字体颜色',
-          type: 'foreColor4',
-          drop:true,
+          name: "字体颜色",
+          type: "foreColor3",
+          drop: true,
           canChoose: true,
           choose: false
         },
+        {
+          name: "字体颜色",
+          type: "foreColor4",
+          drop: true,
+          canChoose: true,
+          choose: false
+        }
       ]
     };
   },
@@ -117,81 +158,81 @@ export default {
   methods: {
     changeStyle(type) {
       switch (type) {
-        case 'bold':
-          document.execCommand('bold', false)
-          break
-        case 'underline':
-          document.execCommand('underline', false)
-          break
-        case 'italic':
-          document.execCommand('italic', false)
-          break
-        case 'foreColor1':
-          document.execCommand('foreColor', 0 ,"rgba(110,110,110,1)")
-          break
-        case 'foreColor2':
-          document.execCommand('foreColor', 0 ,"rgba(241,89,108,1)")
-          break
-        case 'foreColor3':
-          document.execCommand('foreColor', 0 ,"rgba(241,223,3,1)")
-          break
-        case 'foreColor4':
-          document.execCommand('foreColor', 0 ,"rgba(80,227,194,1)")
-          break
+        case "bold":
+          document.execCommand("bold", false);
+          break;
+        case "underline":
+          document.execCommand("underline", false);
+          break;
+        case "italic":
+          document.execCommand("italic", false);
+          break;
+        case "foreColor1":
+          document.execCommand("foreColor", 0, "rgba(110,110,110,1)");
+          break;
+        case "foreColor2":
+          document.execCommand("foreColor", 0, "rgba(241,89,108,1)");
+          break;
+        case "foreColor3":
+          document.execCommand("foreColor", 0, "rgba(241,223,3,1)");
+          break;
+        case "foreColor4":
+          document.execCommand("foreColor", 0, "rgba(80,227,194,1)");
+          break;
         default:
-          console.log('none')
+          console.log("none");
       }
     },
-    iconClick (event, type, dropType) {
-      event.preventDefault()
-      this.$refs.editor.focus()
+    iconClick(event, type, dropType) {
+      event.preventDefault();
+      this.$refs.editor.focus();
       // let $el=this.$refs.editor;
       // this.keepLastIndex($el);
       // 恢复光标
-      this.restoreSelection()
+      this.restoreSelection();
       // 修改所选区域的样式
-      this.changeStyle(type)
+      this.changeStyle(type);
       // this.$nextTick(() => {
-        // if (dropType) {
-        //   type = dropType
-        // }
-        var arr = JSON.parse(JSON.stringify(this.iconList))
-        arr = arr.map((val, index) => {
-          if (type === val.type && val.canChoose) {
-            val.choose = val.choose ? false : true
-          }else {
-            if (val.drop) {
-              val.choose = false
-            }
+      // if (dropType) {
+      //   type = dropType
+      // }
+      var arr = JSON.parse(JSON.stringify(this.iconList));
+      arr = arr.map((val, index) => {
+        if (type === val.type && val.canChoose) {
+          val.choose = val.choose ? false : true;
+        } else {
+          if (val.drop) {
+            val.choose = false;
           }
-          return val
-        })
-        // if (type === 'clear') {
-        //   var a = this.getSelect()
-        //   if (a.startOffset === a.endOffset) {
-        //     document.execCommand('insertHTML', false, '&nbsp')
-        //     // return false
-        //   }
-        //   arr = arr.map((val, index) => {
-        //     val.choose = false
-        //     return val
-        //   })
-        // }
-        this.iconList = arr
+        }
+        return val;
+      });
+      // if (type === 'clear') {
+      //   var a = this.getSelect()
+      //   if (a.startOffset === a.endOffset) {
+      //     document.execCommand('insertHTML', false, '&nbsp')
+      //     // return false
+      //   }
+      //   arr = arr.map((val, index) => {
+      //     val.choose = false
+      //     return val
+      //   })
+      // }
+      this.iconList = arr;
       // })
     },
     restoreSelection() {
-      var selection = window.getSelection()
+      var selection = window.getSelection();
       if (this.selectedRange) {
         try {
-          selection.removeAllRanges() /*清空所有Range对象*/
+          selection.removeAllRanges(); /*清空所有Range对象*/
         } catch (ex) {
           /*IE*/
-          document.body.createTextRange().select()
-          document.selection.empty()
+          document.body.createTextRange().select();
+          document.selection.empty();
         }
         /*恢复保存的范围*/
-        selection.addRange(this.selectedRange)
+        selection.addRange(this.selectedRange);
       }
     },
     returnPage() {
@@ -292,10 +333,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.content-edit i{
+.content-edit i {
   font-style: italic !important;
 }
-.content-edit b{
+.content-edit b {
   font-weight: bold !important;
 }
 .upload-header {
@@ -317,10 +358,10 @@ export default {
   background: url("../../static/fanhui.svg") no-repeat;
   background-size: 100%;
 }
-.upload-header .center{
+.upload-header .center {
   text-align: center;
 }
-.upload-header .right{
+.upload-header .right {
   text-align: right;
 }
 .title-edit {
@@ -360,10 +401,10 @@ export default {
   border-left: none;
   border-right: none;
 }
-.edit-tool .left .active{
-  color:blue;
+.edit-tool .left .active {
+  color: blue;
 }
-.edit-tool .right .active{
+.edit-tool .right .active {
   border: 1px solid #c8c8c8;
 }
 .edit-tool .left,
@@ -376,7 +417,7 @@ export default {
   display: block;
   width: 40px;
   padding: 14px 55px;
-  border:none;
+  border: none;
   background: none;
 }
 .edit-tool .left input:nth-child(1) {
@@ -392,9 +433,9 @@ export default {
   height: 60px;
   border-radius: 100px;
   margin: 24px 24px;
-  border:none;
+  border: none;
 }
-.edit-tool .right .active{
-  border:4px solid #c8c8c8;
+.edit-tool .right .active {
+  border: 4px solid #c8c8c8;
 }
 </style>
