@@ -389,7 +389,7 @@ export default {
   display: block;
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 100px;
   margin: 24px 24px;
   border:none;
 }

@@ -153,9 +153,9 @@ export default {
       //单张上传
       let result = await upload(e.target.files[0], this.getBucket);
       let {
-        res: { requestUrls }
+        name,res: { requestUrls }
       } = result;
-      let url = requestUrls[0];
+      let url = `${VUE_APP_CDN}/${name}`;
       this.insertPic(url);
     },
     getBucket() {
