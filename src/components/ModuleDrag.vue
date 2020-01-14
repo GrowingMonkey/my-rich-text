@@ -4,7 +4,7 @@
       <div class="left" @click="returnPage">
         <i></i>
       </div>
-      <div class="center">段落排序</div>
+      <div class="center">排序</div>
       <div class="right"></div>
     </header>
     <!-- <div id="drag">
@@ -22,7 +22,7 @@
         </div>
       </div>
     </div> -->
-    <draggable v-model="copyList" group="people" @start="drag=true" @end="drag=false">
+    <draggable v-model="copyList" group="people" @start="drag=true" @end="drag=false" id="drag">
       <div v-for="(item,index) in copyList" :key="index" class="drag-item">
         <div class="left" v-if="item.type==1">
           <span>{{item.content}}</span>
@@ -175,6 +175,12 @@ export default {
 .upload-header div {
   width: 208px;
   font-size: 52px;
+}
+.upload-header .center{
+  text-align: center;
+}
+.upload-header .right{
+  text-align: right;
 }
 .upload-header i {
   width: 37px;

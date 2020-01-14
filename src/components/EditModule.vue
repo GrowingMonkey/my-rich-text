@@ -316,6 +316,12 @@ export default {
   background: url("../../static/fanhui.svg") no-repeat;
   background-size: 100%;
 }
+.upload-header .center{
+  text-align: center;
+}
+.upload-header .right{
+  text-align: right;
+}
 .title-edit {
   padding: 54px 58px 48px 58px;
   box-sizing: border-box;

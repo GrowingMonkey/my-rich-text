@@ -42,7 +42,7 @@
           <div class="right">
             <h1 @click="jumpDrag">段落排序</h1>
             <span></span>
-            <h1 @click="saveModule">保存段落</h1>
+            <h1 @click="saveModule">存为段落</h1>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@
         </div>
       </div>
     </div>
-    <input type="file" ref="allImgChange" @change="onImgChange" />
+    <input type="file" class="changeImg" ref="allImgChange" @change="onImgChange" />
     <footer>
       <span class="scan">预览</span>
       <span class="send">发布</span>
@@ -229,6 +229,12 @@ export default {
   width: 156px;
   font-size: 52px;
 }
+.upload-header .center{
+  text-align: center;
+}
+.upload-header .right{
+  text-align: right;
+}
 .upload-header i {
   width: 37px;
   height: 69px;
@@ -252,6 +258,10 @@ export default {
 }
 .upload-duanluo {
   width: 100%;
+}
+.changeImg{
+  display: none;
+  overflow: hidden;
 }
 .upload-duanluo .upload-duanluo-title {
   box-sizing: border-box;
