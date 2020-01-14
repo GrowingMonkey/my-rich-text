@@ -162,7 +162,11 @@ export default {
   color: rgba(182, 182, 182, 1);
 }
 .drag-item .action h1 {
+  padding: 32px 0;
   margin-left: 32px;
+}
+.drag-item .action h1:hover{
+  opacity: .8;
 }
 .upload-header {
   width: 100%;

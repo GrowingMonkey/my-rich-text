@@ -108,18 +108,27 @@ export default {
   },
   mounted() {},
   methods: {
+    loadingShow(val){
+      this.$showLoading(val+'');
+    },
+    loadingHide(){
+      this.$hideLoading();
+    },
     uploadImg(e) {
       this.$refs.uploadinput.click();
     },
     upLoadCover(e) {
       this.$refs.uploadcover.click();
     },
+
     //封面上传
     async onFileChange(e) {
+     
       console.log(e);
       if (e.target.files.length == 0) {
         return;
       }
+       this.$showLoading('上传中');
       //单张上传
       let result = await upload(e.target.files[0], this.getBucket);
       let {
@@ -127,6 +136,7 @@ export default {
       } = result;
       let url = requestUrls[0];
       this.cover = `${VUE_APP_CDN}/${name}`;
+      this.loadingHide();
     },
     ImgChange(i) {
       console.log(i);
@@ -134,9 +144,11 @@ export default {
       this.$refs.allImgChange.click();
     },
     async onImgChange(e) {
+
       if (e.target.files.length == 0) {
         return;
       }
+       this.$showLoading('上传中');
       //单张上传
       let result = await upload(e.target.files[0], this.getBucket);
       let {
@@ -144,6 +156,7 @@ export default {
       } = result;
       let url = requestUrls[0];
       this.moduleList[this.currentIndex].content = url;
+      this.loadingHide();
     },
     //图片上传
     async onFileChangeImg(e) {
