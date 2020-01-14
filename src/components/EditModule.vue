@@ -47,28 +47,28 @@
         />
       </div>
       <div class="right">
-        <div style="border-radius:50%">
+        <div >
           <button
             style="background:rgba(110,110,110,1);"
             :class="{ active: iconList[3].choose }"
             @click="iconClick($event, 'foreColor1', 'style')"
           ></button>
         </div>
-        <div style="border-radius:50%">
+        <div >
           <button
             style="background:rgba(241,89,108,1);"
             :class="{ active: iconList[4].choose }"
             @click="iconClick($event, 'foreColor2', 'style')"
           ></button>
         </div>
-        <div style="border-radius:50%">
+        <div>
           <button
             style="background:rgba(241,223,3,1);"
             :class="{ active: iconList[5].choose }"
             @click="iconClick($event, 'foreColor3', 'style')"
           ></button>
         </div>
-        <div style="border-radius:50%">
+        <div>
           <button
             style="background:rgba(80,227,194,1);"
             :class="{ active: iconList[6].choose }"
@@ -407,11 +407,15 @@ export default {
 .edit-tool .right .active {
   border: 1px solid #c8c8c8;
 }
-.edit-tool .left,
-.edit-tool .right {
+.edit-tool .left{
   height: 144px;
   display: flex;
   align-items: center;
+}
+.edit-tool .right>div{
+  float: left;
+  overflow: hidden;
+  margin-top:15px; 
 }
 .edit-tool .left input {
   display: block;
