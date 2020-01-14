@@ -40,9 +40,9 @@
             </button>
           </div>
           <div class="right">
-            <h1 @click="jumpDrag">段落排序</h1>
+            <h1 @click.stop.prevent="jumpDrag">段落排序</h1>
             <span></span>
-            <h1 @click="saveModule">存为段落</h1>
+            <h1 @click.stop.prevent="saveModule">存为段落</h1>
           </div>
         </div>
       </div>
@@ -57,11 +57,11 @@
             <input type="file" ref="uploadcover" @change="onFileChange" />
           </div>
         </div>
-        <div class="module-container" v-for="(v,i) in moduleList" :key="i">
-          <div v-if="v.type==1" class="text-info" @click="jumpEdit">
+        <div class="module-container" v-for="(v,i) in moduleList" :key="i"  @click.stop.prevent="jumpEdit(v,i)">
+          <div v-if="v.type==1" class="text-info">
             <span>{{v.content}}</span>
           </div>
-          <img :src="v.content" alt v-if="v.type==2" @click="ImgChange(i)" />
+          <img :src="v.content" alt v-if="v.type==2"/>
           <div class="index" style="font-size: 12px;">{{i>=100?`${i+1}`:`${i+1}&nbsp;`}}</div>
         </div>
       </div>
@@ -182,12 +182,24 @@ export default {
     jumpDrag() {
       this.$router.push("/moduledrag");
     },
-    jumpEdit() {
-      this.$router.push("/edit");
+    jumpEdit(v,i) {
+      if(v.type===1){
+        this.$router.push("/edit");
+      }else{
+        this.ImgChange(i);
+      }
     },
     saveModule() {
       let that = this;
       const currentObj = { ...that.duanluo };
+      if(currentObj.content==''){
+        that.$alert({
+          title:'提示信息',
+          text:'段落内容不能为空',
+          sureText:"确定"
+        })
+        return false;
+      }
       this.moduleList.push(currentObj);
       this.duanluo.title = "";
       this.duanluo.content = "";

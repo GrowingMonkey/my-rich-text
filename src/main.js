@@ -4,9 +4,14 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import {post,fetch,patch,put} from './request.js'
-import Vant from 'vant';
-import 'vant/lib/index.css';
-Vue.use(Vant);
+// import Vant from 'vant';
+// import 'vant/lib/index.css';
+
+// Vue.use(Vant);
+import {Toast,Alert,Loading} from 'vue-dialog-simple'
+Vue.use(Toast);
+Vue.use(Alert);
+Vue.use(Loading);
 Vue.config.productionTip = false;
 Vue.prototype.$post=post;
 Vue.prototype.$fetch=fetch;
