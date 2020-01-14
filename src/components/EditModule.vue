@@ -29,10 +29,11 @@
         <input class="underline" :class="{ active: iconList[2].choose }" value="U" type="button" @click="iconClick($event, 'underline', 'style')"/>
       </div>
       <div class="right">
-        <button style="background:rgba(110,110,110,1);" :class="{ active: iconList[3].choose }" @click="iconClick($event, 'foreColor1', 'style')"></button>
-        <button style="background:rgba(241,89,108,1);"  :class="{ active: iconList[4].choose }" @click="iconClick($event, 'foreColor2', 'style')"></button>
-        <button style="background:rgba(241,223,3,1);"  :class="{ active: iconList[5].choose }" @click="iconClick($event, 'foreColor3', 'style')"></button>
-        <button style="background:rgba(80,227,194,1);" :class="{ active: iconList[6].choose }" @click="iconClick($event, 'foreColor4', 'style')"></button>
+        <div style="border-radius:50%">
+        <button style="background:rgba(110,110,110,1);" :class="{ active: iconList[3].choose }" @click="iconClick($event, 'foreColor1', 'style')"></button></div>
+        <div style="border-radius:50%"><button style="background:rgba(241,89,108,1);"  :class="{ active: iconList[4].choose }" @click="iconClick($event, 'foreColor2', 'style')"></button></div>
+        <div style="border-radius:50%"><button style="background:rgba(241,223,3,1);"  :class="{ active: iconList[5].choose }" @click="iconClick($event, 'foreColor3', 'style')"></button></div>
+        <div style="border-radius:50%"><button style="background:rgba(80,227,194,1);" :class="{ active: iconList[6].choose }" @click="iconClick($event, 'foreColor4', 'style')"></button></div>
       </div>
     </div>
   </div>
