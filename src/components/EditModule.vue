@@ -429,9 +429,11 @@ export default {
 }
 .edit-tool .right button {
   display: block;
+  overflow: hidden;
   width: 60px;
   height: 60px;
-  border-radius: 100px;
+  border-radius: 50%;
+  -webkit-appearance:none;
   margin: 24px 24px;
   border: none;
 }
