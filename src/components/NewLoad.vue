@@ -326,12 +326,12 @@ export default {
 /* Firefox版本19+ */
 ::-moz-placeholder {
   color: #bbb;
-  padding-top: 0.16rem;
+  padding-top: 0.08rem;
 }
 /* IE浏览器 */
 :-ms-input-placeholder {
   color: #bbb;
-  padding-top: 0.16rem;
+  padding-top: 0.08rem;
 }
 .upload-duanluo .upload-duanluo-content {
   box-sizing: border-box;
