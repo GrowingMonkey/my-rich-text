@@ -443,6 +443,6 @@ export default {
   border: none;
 }
 .edit-tool .right .active{
-  border: 4px solid #c8c8c8;
+  border: 10px solid #c8c8c8;
 }
 </style>
