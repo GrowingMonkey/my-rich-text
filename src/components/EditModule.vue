@@ -432,16 +432,17 @@ export default {
   text-decoration: underline;
 }
 .edit-tool .right button {
+  padding: 0;
   display: block;
   overflow: hidden;
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius:100% 100% 100% 100%;
   -webkit-appearance:none;
   margin: 24px 24px;
   border: none;
 }
-.edit-tool .right .active {
+.edit-tool .right .active{
   border: 4px solid #c8c8c8;
 }
 </style>
