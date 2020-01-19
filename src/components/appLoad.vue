@@ -36,7 +36,6 @@
 <script>
 import axios from "axios";
 import OSS from "ali-oss";
-import { Toast, Dialog } from "vant";
 import vEditDiv from "./vEditDiv";
 import qs from "qs";
 import configuration from "../utils/utils";
@@ -90,9 +89,11 @@ export default {
     // this.coverUrl=`bg/${Math.floor(Math.random()*5)+1}.jpg`
     // this.token=JSON.parse(window.localStorage.header).token;
     let header = JSON.parse(window.localStorage.getItem("header"));
-    if (!header.token || header.token == "undefined") {
-      Dialog.alert({
-        message: "获取用户信息错误"
+    if (!header.token || header.token == "undefined"||!header.originUrl) {
+      this.$alert({
+        title: "提示信息",
+        text: "获取用户信息错误",
+        sureText: "确定"
       }).then(() => {
         this.returnPage();
       });
@@ -145,6 +146,12 @@ export default {
     });
   },
   methods: {
+    loadingShow(val) {
+      this.$showLoading(val + ""); //默认“加载中”
+    },
+    loadingHide() {
+      this.$hideLoading();
+    },
     //获取阿里云签名数据
     async getSTStoken() {
       let that = this;
@@ -154,7 +161,11 @@ export default {
         }/upload/pic/getSTSToken`
       ).then(res => {
         if (res && res.code != 0) {
-          Toast(res.message);
+          that.$alert({
+            title: "提示信息",
+            text: res.message,
+            sureText: "确定"
+          });
         } else {
           return res;
         }
@@ -268,7 +279,6 @@ export default {
                   that.coverUrl = newFileName;
                   // that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw)";
                 }
-                Toast.clear();
               } else {
                 // Toast("上传失败");
                 // Toast({ message: '上传失败', duration: 1000 });
@@ -298,13 +308,10 @@ export default {
                   that.coverUrl = newFileName;
                   // that.contentHeight="calc(100vh - 15.29791vw - 64.41224vw);";
                 }
-                Toast.clear();
               } else {
                 // Toast("上传失败");
-                Toast.clear();
                 //           that.toast=Toast({
                 //   duration: 2000, // 持续展示 toast
-
                 //   message: "上传失败"
                 // });
               }
@@ -354,9 +361,7 @@ export default {
         if (this.times != 1) {
           window.location.href = `jsbridge://${VUE_APP_CLOSE}/timeClose`;
           //window.location.href = "jsbridge://www.aiyu2019.com/timeClose";//艾鱼
-        }
-        // alert(window.dove.closePage);
-        else {
+        } else {
           window.dove.closePage();
         }
       } else {
@@ -398,15 +403,9 @@ export default {
       let file = e.target.files[0];
       let imgStr = /\.(jpg|jpeg|png|bmp|BMP|JPG|PNG|JPEG)$/;
       if (!imgStr.test(file.name)) {
-        alert("文件不是图片类型");
         return false;
       }
-      that.toast = Toast.loading({
-        duration: 0, // 持续展示 toast
-        forbidClick: true, // 禁用背景点击
-        loadingType: "spinner",
-        message: "上传中1"
-      });
+      that.loadingShow("上传中");
       let reader = new FileReader();
       //file转base64
       reader.readAsDataURL(file);
@@ -424,11 +423,12 @@ export default {
         that.getpublishId().then(res => {
           if (res.code != 0) {
             // alert("服务端错误");
-            Dialog.alert({
+            that.$alert({
               title: "服务端错误",
-              message: res.message
+              text: res.message,
+              sureText: "确定"
             });
-            Toast.clear();
+            that.loadingHide();
             that.returnPage();
           }
           //获取上传oss秘钥
@@ -440,7 +440,11 @@ export default {
             )
             .then(res => {
               if (res["code"] != 0) {
-                Toast({ message: "上传失败", duration: 1000 });
+                that.$alert({
+                  title: "提示信息",
+                  text: res.message,
+                  sureText: "确定"
+                });
               } else {
                 let store = JSON.parse(res.data);
                 console.log(store);
@@ -526,27 +530,23 @@ export default {
             parallel: 2,
             checkpoint: cpt,
             progress: function*(percent, cpt) {
-              
               checkpoint_temp = cpt;
             }
           })
           .then(function(result) {
-            
             if (result) {
               if (that.positionImg == "cover") {
                 that.firstUp = false;
                 that.coverUrl = result.name;
               }
-              
+
               // that.form.videoUrl = `${result.name.indexOf('input')>-1?result.name.replace('input','output'):result.name}`;
             }
           })
           .catch(function(err) {
-            
             // that.multipartUploadWithSts(storeAs, file, checkpoint_temp);
           });
       } else {
-       
         ossClient
           .multipartUpload(storeAs, file, {
             parallel: 2,
@@ -607,11 +607,12 @@ export default {
             : currentFile;
         this.getpublishId().then(res => {
           if (res.code != 0) {
-            Dialog.alert({
+            that.$alert({
               title: "服务端错误",
-              message: res.message
+              text: res.message,
+              sureText: "确定"
             });
-            Toast.clear();
+            that.loadingHide();
             that.returnPage();
           }
           that
@@ -810,7 +811,7 @@ export default {
       for (let i = 0; i < arrImgAll.length; i++) {
         let domObj = document.createElement("div");
         domObj.innerHTML = arrImgAll[i];
-     
+
         if (
           !domObj.childNodes[0].hasAttribute("name") &&
           domObj.childNodes[0].getAttribute("name") != "oneupload"
@@ -883,14 +884,8 @@ export default {
     // //定义app调用的方法
     async submitForm(val, type) {
       let that = this;
-      type == 1 &&
-        Toast.loading({
-          duration: 3000, // 持续展示 toast
-          forbidClick: true, // 禁用背景点击
-          loadingType: "spinner",
-          message: "发布中"
-        });
       console.log(type);
+      type == 1 && that.loadingShow("发表中");
       if (type == "clear") {
         this.clearMethod();
         return;
@@ -908,22 +903,25 @@ export default {
             currentUrl.split("?")[0].split("/").length - 1
           ];
           let base64 = await that.getBase64(currentUrl);
-          if (base64 &&base64.failstatus) {
+          if (base64 && base64.failstatus) {
             continue;
           }
-           let bolbFile = that.dataURLtoBlob(base64);
-            currentFile.file = that.blobToFile(bolbFile, currentFile.fileName);
-            let fileName = `others/${currentFile.fileName}`;
-            console.log("文件名:" + fileName);
-            // multipartUploadWithSts(clientOss,`img/${new Date().getTime()}.jpg`,fileDate);
-            let resut = await that.clientOss.multipartUpload(
-              fileName,
-              currentFile.file
+          let bolbFile = that.dataURLtoBlob(base64);
+          currentFile.file = that.blobToFile(bolbFile, currentFile.fileName);
+          let fileName = `others/${currentFile.fileName}`;
+          console.log("文件名:" + fileName);
+          // multipartUploadWithSts(clientOss,`img/${new Date().getTime()}.jpg`,fileDate);
+          let resut = await that.clientOss.multipartUpload(
+            fileName,
+            currentFile.file
+          );
+          if (resut && resut.name) {
+            console.log(resut);
+            that.text = that.text.replace(
+              currentUrl,
+              `${VUE_APP_CDN}/${resut.name}`
             );
-            if (resut && resut.name) {
-              console.log(resut)
-              that.text=that.text.replace(currentUrl, `${VUE_APP_CDN}/${resut.name}`);
-            }
+          }
           // .then(function (result) {
           //     // var url = result.res.requestUrls[0];
           //     // var length = url.lastIndexOf('?');
@@ -943,20 +941,32 @@ export default {
       that.isDisable = true;
       this.getpublishId().then(res => {
         if (res.code != 0) {
-          Dialog.alert({
+          that.loadingHide();
+          that.$alert({
             title: "服务端错误",
-            message: res.message
+            text: res.message,
+            sureText: "确定"
           });
           that.returnPage();
         } else {
           if (type == 1 && !that.title) {
-            Toast({ message: "请输入标题", duration: 1000 });
+            that.loadingHide();
+            this.$alert({
+              title: "提示信息",
+              text: "请输入标题",
+              sureText: "确定"
+            });
             that.isDisable = false;
             return;
           }
           if (that.text == "<p> </p>") {
             that.isDisable = false;
-            Toast({ message: "请输入内容", duration: 1000 });
+            that.loadingHide();
+            this.$alert({
+              title: "提示信息",
+              text: "请输入内容",
+              sureText: "确定"
+            });
             return;
           }
           let detail;
@@ -964,7 +974,11 @@ export default {
             detail = that.getDetail(that.text, type).substring(0, 100);
           }
           if (type == 1 && detail.replace(/\s/g, "") == "") {
-            Toast({ message: "请输入文字", duration: 1000 });
+            this.$alert({
+              title: "提示信息",
+              text: "请输入文字",
+              sureText: "确定"
+            });
             that.isDisable = false;
             return;
           }
@@ -1017,7 +1031,11 @@ export default {
                 window.localStorage.setItem("draft_id", Response.data.id);
               } else {
                 window.localStorage.setItem("publishId", "");
-                Toast({ message: Response.message, duration: 1000 });
+                this.$alert({
+                  title: "提示信息",
+                  text: Response.message,
+                  sureText: "确定"
+                });
               }
               that.isDisable = false;
             });
@@ -1028,7 +1046,11 @@ export default {
       let re = new RegExp("<[^<>]+>", "g");
       let text = html.replace(re, "");
       if (type == 1 && text == "") {
-        Toast({ message: "请输入文字", duration: 1000 });
+        this.$alert({
+          title: "提示信息",
+          text: "请输入文字",
+          sureText: "确定"
+        });
       }
       //或
       //var text = html_str.replace(/<[^<>]+>/g,"");

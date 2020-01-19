@@ -47,14 +47,14 @@
         />
       </div>
       <div class="right">
-        <div >
+        <div>
           <button
             style="background:rgba(110,110,110,1);"
             :class="{ active: iconList[3].choose }"
             @click="iconClick($event, 'foreColor1', 'style')"
           ></button>
         </div>
-        <div >
+        <div>
           <button
             style="background:rgba(241,89,108,1);"
             :class="{ active: iconList[4].choose }"
@@ -160,6 +160,7 @@ export default {
       switch (type) {
         case "bold":
           document.execCommand("bold", false);
+          // document.execCommand("insertHtml", 'a',false);
           break;
         case "underline":
           document.execCommand("underline", false);
@@ -183,49 +184,133 @@ export default {
           console.log("none");
       }
     },
+    insertAfter(newNode, curNode) {
+      console.log(curNode.parentNode);
+      curNode.parentNode.insertBefore(newNode, curNode.nextElementSibling);
+    },
     iconClick(event, type, dropType) {
       event.preventDefault();
+      console.log(event);
       this.$refs.editor.focus();
       // let $el=this.$refs.editor;
       // this.keepLastIndex($el);
+      this.selectedRange = this.getSelect();
+      if (event.target.classList.contains("active")) {
+        //解决safari中文光标位置
+        //获取光标所在位置的节点,
+        console.log(
+          window.getSelection().getRangeAt(0).startContainer.parentElement
+        );
+        let el = window.getSelection().getRangeAt(0).startContainer.parentElement;
+        // let span=document.createElement('span');
+        // this.insertAfter(span,el);
+        // console.log(el);
+        // el.focus();
+        var selection = window.getSelection();
+        let span = document.createElement("span");
+        let range = document.createRange();
+        range.collapse(false);
+        range.insertNode(span);
+        selection.removeAllRanges(); /*清空所有Range对象*/
+        range.setStart(
+          span,
+          0
+        );
+        range.setEnd(
+           span,
+            1
+        );
+        selection.addRange(range);
+        // this.placeCaretAtEnd(span);
+      }
       // 恢复光标
       this.restoreSelection();
+      // 恢复光标
+      // this.restoreSelection();
       // 修改所选区域的样式
       this.changeStyle(type);
-      // this.$nextTick(() => {
-      // if (dropType) {
-      //   type = dropType
-      // }
-      var arr = JSON.parse(JSON.stringify(this.iconList));
-      arr = arr.map((val, index) => {
-        if (type === val.type && val.canChoose) {
-          val.choose = val.choose ? false : true;
-        } else {
-          if (val.drop) {
-            val.choose = false;
+      this.$nextTick(() => {
+        // if (dropType) {//下拉菜单的type
+        //   type = dropType
+        // }
+        //改变当前元素的样式
+        let sourceArr = JSON.parse(JSON.stringify(this.iconList));
+        let arr = sourceArr.map((val, index) => {
+          if (type === val.type && val.canChoose) {
+            val.choose = val.choose ? false : true;
           }
-        }
-        return val;
+          // else {
+          //   if (val.drop) {
+          //     val.choose = false;
+          //   }
+          // }
+          return val;
+        });
+
+        // if (type === 'clear') {
+        //   var a = this.getSelect()
+        //   if (a.startOffset === a.endOffset) {
+        //     document.execCommand('insertHTML', false, '&nbsp')
+        //     // return false
+        //   }
+        //   arr = arr.map((val, index) => {
+        //     val.choose = false
+        //     return val
+        //   })
+        // }
+        this.iconList = arr;
       });
-      // if (type === 'clear') {
-      //   var a = this.getSelect()
-      //   if (a.startOffset === a.endOffset) {
-      //     document.execCommand('insertHTML', false, '&nbsp')
-      //     // return false
-      //   }
-      //   arr = arr.map((val, index) => {
-      //     val.choose = false
-      //     return val
-      //   })
-      // }
-      this.iconList = arr;
-      // })
+    },
+    //获取选中
+    getSelect() {
+      if (window.getSelection) {
+        /*主流的浏览器，包括chrome、Mozilla、Safari*/
+        var sel = window.getSelection();
+        console.log(sel.getRangeAt(0));
+        if (sel.rangeCount > 0) {
+          return sel.getRangeAt(0);
+        }
+      } else if (document.selection) {
+        /*IE下的处理*/
+        return document.selection.createRange();
+      }
+      return null;
+    },
+    placeCaretAtEnd(el) {
+      //传入光标要去的jq节点对象
+      el.focus();
+      if (
+        typeof window.getSelection != "undefined" &&
+        typeof document.createRange != "undefined"
+      ) {
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else if (typeof document.body.createTextRange != "undefined") {
+        var textRange = document.body.createTextRange();
+        textRange.moveToElementText(el);
+        textRange.collapse(false);
+        textRange.select();
+      }
     },
     restoreSelection() {
       var selection = window.getSelection();
+      console.log(this.selectedRange);
+      let range = document.createRange();
       if (this.selectedRange) {
         try {
           selection.removeAllRanges(); /*清空所有Range对象*/
+          range.setStart(
+            this.selectedRange.startContainer,
+            this.selectedRange.startOffset
+          );
+          range.setEnd(
+            this.selectedRange.endContainer,
+            this.selectedRange.endOffset
+          );
         } catch (ex) {
           /*IE*/
           document.body.createTextRange().select();
@@ -239,7 +324,7 @@ export default {
       this.$router.go(-1);
     },
     editChange() {
-      console.log(this.$refs.editor.children);
+      // console.log(this.$refs.editor.children);
       let that = this;
       if (this.$refs.editor.children.length == 0) {
         this.$refs.editor.value = `<p></p>`;
@@ -407,21 +492,22 @@ export default {
 .edit-tool .right .active {
   border: 1px solid #c8c8c8;
 }
-.edit-tool .left{
+.edit-tool .left {
   height: 144px;
   display: flex;
   align-items: center;
 }
-.edit-tool .right>div{
+.edit-tool .right > div {
   float: left;
   overflow: hidden;
-  margin-top:15px; 
+  margin-top: 15px;
 }
 .edit-tool .left input {
   display: block;
   width: 40px;
   padding: 14px 55px;
   border: none;
+  font-size: 64px;
   background: none;
 }
 .edit-tool .left input:nth-child(1) {
@@ -437,12 +523,12 @@ export default {
   overflow: hidden;
   width: 60px;
   height: 60px;
-  border-radius:100% 100% 100% 100%;
-  -webkit-appearance:none;
+  border-radius: 100% 100% 100% 100%;
+  -webkit-appearance: none;
   margin: 24px 24px;
   border: none;
 }
-.edit-tool .right .active{
+.edit-tool .right .active {
   border: 10px solid #c8c8c8;
 }
 </style>
