@@ -18,6 +18,7 @@
       @input="editChange"
       ref="editor"
       @paste="pasteText"
+      @click="onClick($event)"
     >
       <!-- <p>{{htmlObj.content}}</p> -->
     </div>
@@ -145,7 +146,8 @@ export default {
           canChoose: true,
           choose: false
         }
-      ]
+      ],
+      activeIconList: []
     };
   },
   mounted() {
@@ -156,14 +158,82 @@ export default {
     this.htmlObj = JSON.parse(window.localStorage.getItem("moduleList"))[0];
   },
   methods: {
+    onClick(event) {
+      let that = this;
+      console.log(event);
+      if(event.target.tagName=='DIV'){
+        return false;
+      }
+      this.activeIconList = [];
+      let target = event.target;
+      this.changeTagStyle(target);
+      let newArr = this.activeIconList.filter(function(x, index, self) {
+        return self.indexOf(x) === index;
+      });
+      for (let i = 0; i < this.iconList.length; i++) {
+        if (newArr[i] === "B") {
+          this.iconList[0].choose = true;
+
+        } else if (newArr[i] === "U") {
+          this.iconList[2].choose = true;
+        } else if (newArr[i] === "I") {
+          this.iconList[1].choose = true;
+        } else {
+          this.iconList[i].choose = false;
+        }
+      }
+    },
+    isToolTag(el) {
+      if (el.tagName == "B") return true;
+      else return false;
+    },
+    changeTagStyle(el) {
+      if (
+        el.tagName == "B" ||
+        el.tagName == "I" ||
+        el.tagName == "U" ||
+        el.tagName == "FONT"
+      ) {
+        this.activeIconList.push(el.tagName);
+        console.log(el.parentNode.tagName);
+      } else if (el.tagName == "DIV") {
+        return;
+      }
+      this.changeTagStyle(el.parentNode);
+    },
     changeStyle(type) {
       switch (type) {
         case "bold":
+          console.log("blod");
+          console.log(this.iconList[0].choose);
+          if(window.navigator.userAgent.indexOf('AppleWebKit')>-1 && this.iconList[0].choose === true){
+              console.log('取消选中 光标后移')
+              let sel = document.getSelection();
+              this.keepLastIndex();
+              // let cursorPos = selection.anchorOffset;
+              // let oldContent = selection.anchorNode.nodeValue;
+              // let newContent =
+              // oldContent.substring(0, cursorPos) +
+              //   toInsert +
+              // oldContent.substring(cursorPos);
+              // selection.anchorNode.nodeValue = newContent;
+              // let range=sel.getRangeAt(0);
+              // range.setStart(range.startContainer,3);
+              // console.log(sel);
+              // console.log(sel.getRangeAt(0));
+              // console.log(sel.focusOffset);
+
+          }
           document.execCommand("bold", false);
           // document.execCommand("insertHtml", 'a',false);
           break;
         case "underline":
+        if(this.iconList[2].choose === false){
           document.execCommand("underline", false);
+        }else{
+          document.execCommand("removeFormat", false);
+        }
+          // document.execCommand("underline", false);
           break;
         case "italic":
           document.execCommand("italic", false);
@@ -184,10 +254,10 @@ export default {
           console.log("none");
       }
     },
-    insertAfter(newNode, curNode) {
-      console.log(curNode.parentNode);
-      curNode.parentNode.insertBefore(newNode, curNode.nextElementSibling);
-    },
+    // insertAfter(newNode, curNode) {
+    //   console.log(curNode.parentNode);
+    //   curNode.parentNode.insertBefore(newNode, curNode.nextElementSibling);
+    // },
     iconClick(event, type, dropType) {
       event.preventDefault();
       console.log(event);
@@ -206,25 +276,25 @@ export default {
         // this.insertAfter(span,el);
         // console.log(el);
         // el.focus();
-        var selection = window.getSelection();
-        let span = document.createElement("span");
-        let range = document.createRange();
-        range.collapse(false);
-        range.insertNode(span);
-        selection.removeAllRanges(); /*清空所有Range对象*/
-        range.setStart(
-          span,
-          0
-        );
-        range.setEnd(
-           span,
-            1
-        );
-        selection.addRange(range);
+        // var selection = window.getSelection();
+        // let span = document.createElement("span");
+        // let range = document.createRange();
+        // range.collapse(false);
+        // range.insertNode(span);
+        // selection.removeAllRanges(); /*清空所有Range对象*/
+        // range.setStart(
+        //   span,
+        //   0
+        // );
+        // range.setEnd(
+        //    span,
+        //     1
+        // );
+        // selection.addRange(range);
         // this.placeCaretAtEnd(span);
       }
       // 恢复光标
-      this.restoreSelection();
+      // this.restoreSelection();
       // 恢复光标
       // this.restoreSelection();
       // 修改所选区域的样式
@@ -323,7 +393,7 @@ export default {
     returnPage() {
       this.$router.go(-1);
     },
-    editChange() {
+    editChange(){
       // console.log(this.$refs.editor.children);
       let that = this;
       if (this.$refs.editor.children.length == 0) {
@@ -332,6 +402,7 @@ export default {
         //   that.keepLastIndex(e.target);
         // }, 5);
       }
+
     },
     //获取光标
     getCaret() {},
@@ -390,9 +461,6 @@ export default {
     },
     //光标定位在末尾
     keepLastIndex(obj) {
-      console.log(obj);
-      console.log(window.getSelection);
-      console.log(document.selection);
       if (window.getSelection) {
         //ie11 10 9 ff safari
         obj.focus(); //解决ff不获取焦点无法定位问题
@@ -409,8 +477,46 @@ export default {
       }
     },
     //粘贴事件处理
-    pasteText(e) {
-      console.log(e);
+    async pasteText(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      let text;
+      if (navigator.clipboard) {
+        text = await navigator.clipboard.readText();
+      } else {
+        text = e.clipboardData.getData("text/plain");
+      }
+      let self = this;
+
+      // 在等待一段时间后，在当前光标位置，粘贴处理后的文本
+      setTimeout(function() {
+        let selection = document.getSelection();
+        let cursorPos = selection.anchorOffset;
+        let oldContent = selection.anchorNode.nodeValue;
+        // 通过 Dom 去除所有样式
+        // let oDiv = document.createElement("div");
+        // oDiv.innerHTML = pasteData;
+        let toInsert = text;
+        let newContent =
+          oldContent.substring(0, cursorPos) +
+          toInsert +
+          oldContent.substring(cursorPos);
+        selection.anchorNode.nodeValue = newContent;
+        // if(window.navigator.userAgent.indexOf('AppleWebKit')>-1){
+        let rag = document.createRange();
+        rag.selectNodeContents(selection.anchorNode); //必须传node
+        rag.collapse(false);
+        let sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(rag);
+
+        // }
+        // console.log(selection);
+        // let range=selection.getRangeAt(0);
+        // range.setStart(range.startContainer,parseInt(cursorPos+toInsert.length));
+        // console.log(range);
+      }, 200);
+      return false;
     }
   }
 };
@@ -470,6 +576,7 @@ export default {
   overflow-y: scroll;
   font-size: 42px;
   color: rgba(73, 73, 73, 1);
+  -webkit-user-select:text;
 }
 .content-edit * {
   font-size: 42px;

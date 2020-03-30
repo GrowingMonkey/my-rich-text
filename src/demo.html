@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>文件上传</title>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<style type="text/css">
+#file{
+display: block;
+width: 400px;
+height: 300px;
+opacity:0;
+margin: -300px 0 0 0;
+}
+#preview{
+display: block;
+width: 400px;
+height: 300px;
+}
+</style>
+</head>
+<body>
+<img id="preview" src="" alt="点击上传图片"/>
+<input type="file" id="file" />
+</body>
+</html>
+<script type="text/javascript">
+$('#file').on('change', function(){
+//获取文件列表对象
+var fileList = $('#file')[0].files;
+console.log(fileList);
+//创建文件流获取文件地址
+var src = URL.createObjectURL(fileList[0]);
+//设置图片路径
+$("#preview").attr("src", src);
+});
+</script>

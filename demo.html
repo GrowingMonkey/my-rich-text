@@ -145,6 +145,7 @@
         @input="editChange"
         ref="editor"
         @paste="pasteText"
+        @click="onClick($event)"
       >
         <!-- <p>{{htmlObj.content}}</p> -->
       </div>
@@ -279,6 +280,19 @@
     this.htmlObj = JSON.parse(window.localStorage.getItem("moduleList"))[0];
   },
   methods: {
+    onClick(event){
+      let target=event.target;
+      console.log(target.parentNode);
+      if(target.tagName==='B'){
+        console.log('修改B标签内的内容');
+        console.log(target.parentNode);
+        this.iconList[0].choose=true;
+      }else if(target.tagName==='U'){
+        this.iconList[2].choose=true;
+      }else if(target.tagName==='I'){
+        this.iconList[1].choose=true;
+      }
+    },
     changeStyle(type) {
       switch (type) {
         case "bold":

@@ -8,7 +8,7 @@
       <div class="right">草稿箱</div>
     </header>
     <div class="upload-title">
-      <input type="text" placeholder="请输入标题" />
+      <input type="text" placeholder="请输入标题" v-model="articleTitle"/>
     </div>
     <div class="upload-duanluo">
       <div class="upload-duanluo-title">
@@ -53,7 +53,7 @@
         <div class="module-container">
           <div class="cover" @click="upLoadCover">
             <h1 v-if="cover==''">添加封面</h1>
-            <img :src="`${cover}?x-oss-process=image/resize,w_200,h_200,m_fill`" v-else />
+            <img :src="`${cover}`" v-else />
             <input type="file" ref="uploadcover" @change="onFileChange" />
           </div>
         </div>
@@ -68,7 +68,7 @@
     </div>
     <input type="file" class="changeImg" ref="allImgChange" @change="onImgChange" />
     <footer>
-      <span class="scan">预览</span>
+      <span class="scan" @click="handlePrew">预览</span>
       <span class="send">发布</span>
     </footer>
   </div>
@@ -106,8 +106,16 @@ export default {
       currentIndex: 0
     };
   },
-  mounted() {},
+  mounted(){
+    let historyModuleList=window.localStorage.getItem('moduleList');
+    if(historyModuleList!=''&&historyModuleList!=undefined&&historyModuleList!='undefined'&&historyModuleList!=null){
+      this.moduleList=JSON.parse(historyModuleList);
+    }
+  },
   methods: {
+    handlePrew(){
+      this.$router.push("/preview");
+    },
     loadingShow(val){
       this.$showLoading(val+'');
     },
@@ -123,8 +131,6 @@ export default {
 
     //封面上传
     async onFileChange(e) {
-     
-      console.log(e);
       if (e.target.files.length == 0) {
         return;
       }
@@ -135,7 +141,7 @@ export default {
         name,res: { requestUrls }
       } = result;
       let url = requestUrls[0];
-      this.cover = `${VUE_APP_CDN}/${name}`;
+      this.cover = `${VUE_APP_CDN}/${name}?x-oss-process=image/resize,w_200,h_200,m_fill`;
       this.loadingHide();
     },
     ImgChange(i) {
@@ -170,6 +176,28 @@ export default {
       } = result;
       let url = `${VUE_APP_CDN}/${name}`;
       this.insertPic(url);
+    },
+    async onFileChangeLocal(e){
+      if (e.target.files.length == 0) {
+        return;
+      }
+      let fileList = e.target.files;
+      console.log(fileList)
+      let src = URL.createObjectURL(fileList[0]);
+      // let url = `${VUE_APP_CDN}/${name}`;
+      // this.insertPic(src);
+      this.cover=src;
+    },
+    async onFileChangeImgLocal(e){
+      if (e.target.files.length == 0) {
+        return;
+      }
+      let fileList = e.target.files;
+      console.log(fileList)
+      let src = URL.createObjectURL(fileList[0]);
+      // let url = `${VUE_APP_CDN}/${name}`;
+      this.insertPic(src);
+      // this.cover=src;
     },
     getBucket() {
       let that=this;
@@ -241,6 +269,11 @@ export default {
         window.localStorage.setItem('moduleList',JSON.stringify(newValue));
       },
       deep: true
+    },
+    'articleTitle':{
+      handler:function(newValue, oldValue) {
+        window.localStorage.setItem('title',newValue);
+      },
     }
   }
 };

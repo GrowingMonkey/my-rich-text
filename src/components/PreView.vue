@@ -1,24 +1,60 @@
 <template>
   <div class="preview">
     <header class="upload-header">
-      <div class="left">
+      <div class="left" @click="returnPage">
         <i></i>
       </div>
       <div class="center">预览</div>
       <div class="right"></div>
     </header>
     <div class="preview-title">
-        hahahahah
+       {{title}}
     </div>
     <div class="preview-content">
-        sss
+        <p v-html="htmlStr"></p>
     </div>
     <footer> 发布</footer>
   </div>
 </template>
 <script>
 export default {
-  name: "PreView"
+  name: "PreView",
+  data(){
+    return {
+      copyList:[],
+      htmlStr:'',
+      title:''
+    }
+  },
+  mounted(){
+    this.title=window.localStorage.getItem("title")||"hahhaha";
+    let historyModuleList=window.localStorage.getItem("moduleList");
+    if(historyModuleList!=''&&historyModuleList!=undefined&&historyModuleList!='undefined'&&historyModuleList!=null){
+      this.copyList=JSON.parse(historyModuleList);
+      this.formatHtml(this.copyList);
+    }
+  },
+  methods:{
+    formatHtml(){
+      let domStr=''
+      for(let i=0;i<this.copyList.length;i++){
+        console.log(this.copyList[i])
+        for(let key  in this.copyList[i]){
+          console.log(key + '---' + this.copyList[i][key])
+          if(key=='title'&&this.copyList[i][key]!=''){
+            domStr+=`<p class="title">${this.copyList[i][key]}</p>`
+          }else if(key=='content'&&this.copyList[i][key]!=''){
+            domStr+=`<p class="content">${this.copyList[i][key]}</p>`
+          }
+        }
+      }
+      this.htmlStr=domStr;
+    },
+    returnPage(){
+      window.localStorage.setItem('moduleList',JSON.stringify(this.copyList));
+      this.$router.go(-1);
+    }
+  }
 };
 </script>
 <style>

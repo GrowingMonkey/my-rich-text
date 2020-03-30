@@ -17,8 +17,9 @@
     "qs": "^6.7.0",
     "sortablejs": "^1.10.1",
     "vant": "^1.6.16",
-    "vue-dialog-simple": "^1.1.12",
     "vue": "^2.5.2",
+    "vue-dialog-simple": "^1.1.12",
+    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.23.2"
   },

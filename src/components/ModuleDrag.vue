@@ -32,17 +32,23 @@
         </div>
         <div class="action">
           <h1 @click.stop.prevent="btnUp(index)">置顶</h1>
-          <h1>查看</h1>
+          <h1 @click.stop.prevent="btnScan(index)">查看</h1>
           <h1 @click.stop.prevent="deleteItem(index)">删除</h1>
         </div>
       </div>
     </draggable>
+    <SlimPopup :show.sync="show" :popup-class="['popup']" popup-transition="slim-zoom-center">
+      <div v-if="popupData.type==1"><span v-html="popupData.content"></span></div>
+      <div v-else><img :src="popupData.content" alt=""></div>
+      <button class="close-btn" @click="show = false">X</button>
+    </SlimPopup>
   </div>
 </template>
 
 <script>
 import Sortable from "sortablejs";
-import draggable from 'vuedraggable'
+import draggable from 'vuedraggable';
+import SlimPopup from './SlimPopup'
 export default {
   name: "ModuleDrag",
   data() {
@@ -51,22 +57,22 @@ export default {
       sortList: {},
       htmlStr: "",
       copyList: [],
-      htmlArray: []
+      htmlArray: [],
+      show:false,
+      popupData:'',
     };
   },
   components:{
-    draggable
+    draggable,
+    SlimPopup
   },
   mounted() {
-
-    // this.copyList=JSON.parse(window.localStorage.getItem("moduleList"));
+    let historyModuleList=window.localStorage.getItem("moduleList");
+    if(historyModuleList!=''&&historyModuleList!=undefined&&historyModuleList!='undefined'&&historyModuleList!=null){
+      this.copyList=JSON.parse(historyModuleList);
+    }
     //添加测试案例
     // let htmlArray=['<h3>朋友列表</h3>','<h3>家人列表</h3>','<h3>亲戚列表</h3>','<h3>同事列表</h3>']
-    window.localStorage.setItem(
-      "moduleList",
-      '[{"type":1,"title":"1","content":"h喝洒是的爱上打算的阿斯顿爱上的阿斯顿 是的阿斯顿爱上的爱上打算的爱上打算的阿斯顿爱上的爱上打算的阿斯顿爱上大说的啊的爱上的1"},{"type":1,"title":"2","content":"2"},{"type":1,"title":"3","content":"3"},{"type":2,"content":"http://imuguang-file.oss-cn-shenzhen.aliyuncs.com/index.png"}]'
-    );
-    this.copyList = JSON.parse(window.localStorage.getItem("moduleList"));
     let that = this;
     // this.getModule();
     // let $ul = this.$el.querySelector("#drag");
@@ -85,6 +91,11 @@ export default {
     // });
   },
   methods: {
+    btnScan(index){
+      console.log(index);
+      this.popupData=this.copyList[index];
+      this.show=true;
+    },
     getModule() {
       let arraysStr = window.localStorage.getItem("moduleArrays");
       let arrays = JSON.parse(arraysStr);
@@ -103,12 +114,29 @@ export default {
       window.localStorage.setItem('moduleList',JSON.stringify(this.copyList));
       this.$router.go(-1);
     }
+  },
+  watch:{
+    copyList: {
+    handler(newVal, oldVal) {
+      if(oldVal){
+        window.localStorage.setItem('moduleList',JSON.stringify(newVal));
+      }
+        console.log('深度监听', newVal, oldVal)
+    },
+    deep: true
+}
   }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.popup-container{
+  display: none;
+}
+.drag-container>.active{
+  display: block;
+}
 .drag-container{
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Chrome/Safari/Opera */
