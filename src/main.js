@@ -4,6 +4,12 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import {post,fetch,patch,put} from './request.js'
+import  VueQuillEditor from 'vue-quill-editor'
+// require styles 引入样式
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+Vue.use(VueQuillEditor)
 // import Vant from 'vant';
 // import 'vant/lib/index.css';
 
