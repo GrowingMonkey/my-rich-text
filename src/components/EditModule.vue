@@ -153,7 +153,7 @@ export default {
   mounted() {
     window.localStorage.setItem(
       "moduleList",
-      '[{"type":1,"title":"12","content":"13333"}]'
+      '[{"type":1,"title":"12","content":"<p>11111</p>"}]'
     );
     this.htmlObj = JSON.parse(window.localStorage.getItem("moduleList"))[0];
   },
@@ -161,7 +161,7 @@ export default {
     onClick(event) {
       let that = this;
       console.log(event);
-      if(event.target.tagName=='DIV'){
+      if (event.target.tagName == "DIV") {
         return false;
       }
       this.activeIconList = [];
@@ -173,7 +173,6 @@ export default {
       for (let i = 0; i < this.iconList.length; i++) {
         if (newArr[i] === "B") {
           this.iconList[0].choose = true;
-
         } else if (newArr[i] === "U") {
           this.iconList[2].choose = true;
         } else if (newArr[i] === "I") {
@@ -204,39 +203,26 @@ export default {
     changeStyle(type) {
       switch (type) {
         case "bold":
-          console.log("blod");
-          console.log(this.iconList[0].choose);
-          if(window.navigator.userAgent.indexOf('AppleWebKit')>-1 && this.iconList[0].choose === true){
-              console.log('取消选中 光标后移')
-              let sel = document.getSelection();
-              this.keepLastIndex();
-              // let cursorPos = selection.anchorOffset;
-              // let oldContent = selection.anchorNode.nodeValue;
-              // let newContent =
-              // oldContent.substring(0, cursorPos) +
-              //   toInsert +
-              // oldContent.substring(cursorPos);
-              // selection.anchorNode.nodeValue = newContent;
-              // let range=sel.getRangeAt(0);
-              // range.setStart(range.startContainer,3);
-              // console.log(sel);
-              // console.log(sel.getRangeAt(0));
-              // console.log(sel.focusOffset);
-
+          if (window.navigator.userAgent.indexOf("AppleWebKit") > -1) {
+            this.setBold();
+          } else {
+            document.execCommand("bold", false);
           }
-          document.execCommand("bold", false);
           // document.execCommand("insertHtml", 'a',false);
           break;
         case "underline":
-        if(this.iconList[2].choose === false){
-          document.execCommand("underline", false);
-        }else{
-          document.execCommand("removeFormat", false);
-        }
-          // document.execCommand("underline", false);
+          if (window.navigator.userAgent.indexOf("AppleWebKit") > -1) {
+            this.setUnderline();
+          } else {
+            document.execCommand("underline", false);
+          }
           break;
         case "italic":
-          document.execCommand("italic", false);
+          if (window.navigator.userAgent.indexOf("AppleWebKit") > -1) {
+            this.setItalic();
+          } else {
+            document.execCommand("italic", false);
+          }
           break;
         case "foreColor1":
           document.execCommand("foreColor", 0, "rgba(110,110,110,1)");
@@ -251,13 +237,36 @@ export default {
           document.execCommand("foreColor", 0, "rgba(80,227,194,1)");
           break;
         default:
-          console.log("none");
       }
     },
     // insertAfter(newNode, curNode) {
     //   console.log(curNode.parentNode);
     //   curNode.parentNode.insertBefore(newNode, curNode.nextElementSibling);
     // },
+    setBold() {
+      if (document.queryCommandState("bold")) {
+        document.execCommand("bold", false, null);
+        document.execCommand("insertHTML", false, "&zwnj;");
+      } else {
+        document.execCommand("bold", false, null);
+      }
+    },
+    setUnderline(){
+      if (document.queryCommandState("underline")) {
+        document.execCommand("underline", false, null);
+        document.execCommand("insertHTML", false, "&zwnj;");
+      } else {
+        document.execCommand("underline", false, null);
+      }
+    },
+    setItalic(){
+      if (document.queryCommandState("italic")) {
+        document.execCommand("italic", false, null);
+        document.execCommand("insertHTML", false, "&zwnj;");
+      } else {
+        document.execCommand("italic", false, null);
+      }
+    },
     iconClick(event, type, dropType) {
       event.preventDefault();
       console.log(event);
@@ -271,7 +280,8 @@ export default {
         console.log(
           window.getSelection().getRangeAt(0).startContainer.parentElement
         );
-        let el = window.getSelection().getRangeAt(0).startContainer.parentElement;
+        let el = window.getSelection().getRangeAt(0).startContainer
+          .parentElement;
         // let span=document.createElement('span');
         // this.insertAfter(span,el);
         // console.log(el);
@@ -393,7 +403,7 @@ export default {
     returnPage() {
       this.$router.go(-1);
     },
-    editChange(){
+    editChange() {
       // console.log(this.$refs.editor.children);
       let that = this;
       if (this.$refs.editor.children.length == 0) {
@@ -402,7 +412,6 @@ export default {
         //   that.keepLastIndex(e.target);
         // }, 5);
       }
-
     },
     //获取光标
     getCaret() {},
@@ -576,7 +585,7 @@ export default {
   overflow-y: scroll;
   font-size: 42px;
   color: rgba(73, 73, 73, 1);
-  -webkit-user-select:text;
+  -webkit-user-select: text;
 }
 .content-edit * {
   font-size: 42px;
